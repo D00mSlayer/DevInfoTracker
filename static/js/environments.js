@@ -52,6 +52,30 @@ angular.module('appLensApp')
             alert('Configuration search feature will search through XML files in the database for: ' + searchTerm);
         };
         
+        // Copy to clipboard functionality
+        $scope.copyToClipboard = function(text) {
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(text).then(function() {
+                    console.log('Copied to clipboard:', text);
+                }).catch(function(err) {
+                    console.error('Failed to copy: ', err);
+                });
+            } else {
+                // Fallback for older browsers
+                const textArea = document.createElement('textarea');
+                textArea.value = text;
+                document.body.appendChild(textArea);
+                textArea.select();
+                try {
+                    document.execCommand('copy');
+                    console.log('Copied to clipboard:', text);
+                } catch (err) {
+                    console.error('Failed to copy: ', err);
+                }
+                document.body.removeChild(textArea);
+            }
+        };
+        
         // Initialize
         $scope.loadEnvironmentData();
     }]);

@@ -93,6 +93,12 @@ angular.module('appLensApp', [])
             }
         };
         
+        // Sidebar toggle functionality
+        $scope.sidebarCollapsed = false;
+        $scope.toggleSidebar = function() {
+            $scope.sidebarCollapsed = !$scope.sidebarCollapsed;
+        };
+        
         // Initialize the app when controller loads
         $scope.init();
     }]);
