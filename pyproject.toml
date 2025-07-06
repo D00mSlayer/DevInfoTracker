@@ -12,4 +12,7 @@ dependencies = [
     "psycopg2-binary>=2.9.10",
     "pyyaml>=6.0.2",
     "trafilatura>=2.0.0",
+    "jira>=3.8.0",
+    "requests>=2.32.4",
+    "python-gitlab>=6.1.0",
 ]

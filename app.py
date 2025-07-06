@@ -3,6 +3,7 @@ import yaml
 import logging
 from flask import Flask, render_template, jsonify, request
 from flask_cors import CORS
+from jira_gitlab_service import JiraGitLabService
 
 # Configure logging
 logging.basicConfig(level=logging.DEBUG)
@@ -19,6 +20,9 @@ app.jinja_env.block_end_string = '%]'
 
 # Enable CORS for API endpoints
 CORS(app)
+
+# Initialize Jira GitLab service
+jira_gitlab_service = JiraGitLabService()
 
 def load_data():
     """Load data from YAML file"""
@@ -126,6 +130,50 @@ def search():
                             })
     
     return jsonify({"results": results[:20]})  # Limit results
+
+@app.route('/api/jira/analyze', methods=['POST'])
+def analyze_jira_ticket():
+    """API endpoint for analyzing Jira tickets"""
+    try:
+        data = request.get_json()
+        ticket_id = data.get('ticket_id')
+        
+        if not ticket_id:
+            return jsonify({"error": "No ticket ID provided"}), 400
+        
+        # Check if API credentials are configured
+        config_status = jira_gitlab_service.check_configuration()
+        if not config_status["jira_configured"]:
+            return jsonify({
+                "error": "Jira API credentials not configured. Please set JIRA_URL, JIRA_USERNAME, and JIRA_API_TOKEN environment variables."
+            }), 400
+        
+        if not config_status["gitlab_configured"]:
+            return jsonify({
+                "error": "GitLab API credentials not configured. Please set GITLAB_URL and GITLAB_TOKEN environment variables."
+            }), 400
+        
+        # Analyze the ticket
+        result = jira_gitlab_service.analyze_jira_ticket(ticket_id)
+        
+        if "error" in result:
+            return jsonify(result), 500
+        
+        return jsonify(result)
+        
+    except Exception as e:
+        logging.error(f"Error in analyze_jira_ticket: {e}")
+        return jsonify({"error": "Internal server error"}), 500
+
+@app.route('/api/jira/config')
+def jira_config_status():
+    """API endpoint to check Jira/GitLab configuration status"""
+    try:
+        config_status = jira_gitlab_service.check_configuration()
+        return jsonify(config_status)
+    except Exception as e:
+        logging.error(f"Error checking configuration: {e}")
+        return jsonify({"error": "Failed to check configuration"}), 500
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5000)

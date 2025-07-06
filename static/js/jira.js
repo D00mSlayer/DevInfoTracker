@@ -1,6 +1,6 @@
 // Jira Analysis Controller
 angular.module('appLensApp')
-    .controller('JiraController', ['$scope', '$timeout', function($scope, $timeout) {
+    .controller('JiraController', ['$scope', '$timeout', '$http', function($scope, $timeout, $http) {
         
         // Jira-specific variables
         $scope.jiraTicketId = '';
@@ -177,14 +177,47 @@ angular.module('appLensApp')
             
             $scope.isAnalyzing = true;
             $scope.analysisResults = null;
+            $scope.analysisError = null;
             
-            // Simulate API call with timeout
-            $timeout(function() {
-                // In a real implementation, this would make an API call to Jira
-                console.log('Analyzing Jira ticket:', ticketId);
-                $scope.analysisResults = $scope.sampleAnalysisData;
-                $scope.isAnalyzing = false;
-            }, 2000);
+            // Check configuration first
+            $http.get('/api/jira/config')
+                .then(function(response) {
+                    if (!response.data.jira_configured || !response.data.gitlab_configured) {
+                        $scope.analysisError = 'API credentials not configured. Please set up Jira and GitLab API credentials.';
+                        $scope.isAnalyzing = false;
+                        return;
+                    }
+                    
+                    // Make API call to analyze ticket
+                    return $http.post('/api/jira/analyze', {ticket_id: ticketId});
+                })
+                .then(function(response) {
+                    if (response && response.data) {
+                        if (response.data.error) {
+                            $scope.analysisError = response.data.error;
+                        } else {
+                            $scope.analysisResults = response.data;
+                        }
+                    }
+                    $scope.isAnalyzing = false;
+                })
+                .catch(function(error) {
+                    console.error('Error analyzing Jira ticket:', error);
+                    if (error.status === 400 || error.status === 500) {
+                        $scope.analysisError = error.data?.error || 'Failed to analyze ticket. Please check your API credentials.';
+                    } else {
+                        $scope.analysisError = 'Network error. Please check your connection and try again.';
+                    }
+                    $scope.isAnalyzing = false;
+                });
+        };
+        
+        // Show sample data for demonstration
+        $scope.showSampleData = function() {
+            $scope.isAnalyzing = false;
+            $scope.analysisError = null;
+            $scope.analysisResults = $scope.sampleAnalysisData;
+            $scope.jiraTicketId = 'PROJ-1234';
         };
         
         // Get ticket type styling
@@ -211,6 +244,11 @@ angular.module('appLensApp')
                 'Defect': 'border-danger'
             };
             return borderClasses[type] || 'border-secondary';
+        };
+        
+        // Get unique ticket types count
+        $scope.getUniqueTicketTypesCount = function(ticketTypeBreakdown) {
+            return ticketTypeBreakdown ? Object.keys(ticketTypeBreakdown).length : 0;
         };
         
         // Copy to clipboard functionality
