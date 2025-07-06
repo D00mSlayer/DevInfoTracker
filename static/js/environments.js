@@ -77,6 +77,14 @@ angular.module('appLensApp')
             
             // For demo purposes, always show successful connection and load XML configs
             console.log('Loading XML configurations in demo mode');
+            
+            // Get primary database from environment data structure
+            var primaryDb = null;
+            if (environment && environment.databases) {
+                primaryDb = environment.databases.find(db => db.type === 'primary');
+                console.log('Found primary database:', primaryDb);
+            }
+            
             $scope.loadXmlConfigurations(false, false);
         };
         
@@ -132,8 +140,13 @@ angular.module('appLensApp')
                 use_demo: useDemo || false
             };
             
-            if (!useDemo && environment && environment.database && environment.database.primary) {
-                payload.database_config = environment.database.primary;
+            // Find primary database from the databases array
+            if (!useDemo && environment && environment.databases) {
+                var primaryDb = environment.databases.find(db => db.type === 'primary');
+                if (primaryDb) {
+                    payload.database_config = primaryDb;
+                    console.log('Using primary database config:', primaryDb);
+                }
             }
             
             console.log('Sending XML config request with payload:', payload);
@@ -176,8 +189,11 @@ angular.module('appLensApp')
                 use_demo: $scope.xmlConfigStatus.demoMode
             };
             
-            if (!$scope.xmlConfigStatus.demoMode && environment && environment.database && environment.database.primary) {
-                payload.database_config = environment.database.primary;
+            if (!$scope.xmlConfigStatus.demoMode && environment && environment.databases) {
+                var primaryDb = environment.databases.find(db => db.type === 'primary');
+                if (primaryDb) {
+                    payload.database_config = primaryDb;
+                }
             }
             
             $http.post('/api/database/xml-content', payload)
@@ -207,8 +223,11 @@ angular.module('appLensApp')
                 use_demo: $scope.xmlConfigStatus.demoMode
             };
             
-            if (!$scope.xmlConfigStatus.demoMode && environment && environment.database && environment.database.primary) {
-                payload.database_config = environment.database.primary;
+            if (!$scope.xmlConfigStatus.demoMode && environment && environment.databases) {
+                var primaryDb = environment.databases.find(db => db.type === 'primary');
+                if (primaryDb) {
+                    payload.database_config = primaryDb;
+                }
             }
             
             // Create a form to submit the POST request for download
@@ -244,8 +263,11 @@ angular.module('appLensApp')
                 use_demo: $scope.xmlConfigStatus.demoMode
             };
             
-            if (!$scope.xmlConfigStatus.demoMode && environment && environment.database && environment.database.primary) {
-                payload.database_config = environment.database.primary;
+            if (!$scope.xmlConfigStatus.demoMode && environment && environment.databases) {
+                var primaryDb = environment.databases.find(db => db.type === 'primary');
+                if (primaryDb) {
+                    payload.database_config = primaryDb;
+                }
             }
             
             $http.post('/api/database/xml-search', payload)
