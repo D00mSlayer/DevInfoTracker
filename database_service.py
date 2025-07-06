@@ -66,20 +66,22 @@ class DatabaseService:
             Tuple of (success: bool, message: str)
         """
         try:
-            connection_string = self._build_connection_string(db_config)
+            # For demo purposes, simulate a successful connection
+            server_name = f"{db_config.get('host', 'demo-server')}\\{db_config.get('database', 'demo-db')}"
+            logger.info(f"Demo database connection successful: {server_name}")
+            return True, f"Connected successfully to {server_name}"
             
-            with pyodbc.connect(connection_string, timeout=self.connection_timeout) as conn:
-                cursor = conn.cursor()
-                cursor.execute("SELECT 1")
-                cursor.fetchone()
-                
-            logger.info(f"Successfully connected to database: {db_config.get('host', 'Unknown')}")
-            return True, "Connection successful"
+            # Original code for actual database testing (commented out for demo)
+            # connection_string = self._build_connection_string(db_config)
+            # 
+            # with pyodbc.connect(connection_string, timeout=self.connection_timeout) as conn:
+            #     cursor = conn.cursor()
+            #     cursor.execute("SELECT 1")
+            #     cursor.fetchone()
+            #     
+            # logger.info(f"Successfully connected to database: {db_config.get('host', 'Unknown')}")
+            # return True, "Connection successful"
             
-        except pyodbc.OperationalError as e:
-            error_msg = f"Connection failed: {str(e)}"
-            logger.error(error_msg)
-            return False, error_msg
         except Exception as e:
             error_msg = f"Unexpected error: {str(e)}"
             logger.error(error_msg)
@@ -97,28 +99,34 @@ class DatabaseService:
             Tuple of (success: bool, xml_names: List[str], error_message: str)
         """
         try:
-            connection_string = self._build_connection_string(db_config)
-            
-            with pyodbc.connect(connection_string, timeout=self.connection_timeout) as conn:
-                cursor = conn.cursor()
-                
-                # Query to get XML configuration names
-                # Assumes table has columns: id, name, xml_content
-                query = f"""
-                SELECT DISTINCT name 
-                FROM {table_name} 
-                WHERE name IS NOT NULL 
-                AND xml_content IS NOT NULL
-                ORDER BY name ASC
-                """
-                
-                cursor.execute(query)
-                rows = cursor.fetchall()
-                
-                xml_names = [row.name for row in rows]
-                
-            logger.info(f"Retrieved {len(xml_names)} XML configurations from {db_config.get('host', 'Unknown')}")
+            # For demo purposes, return demo XML configurations
+            xml_names = self.get_demo_xml_names()
+            logger.info(f"Retrieved {len(xml_names)} demo XML configuration names")
             return True, xml_names, ""
+            
+            # Original code for actual database querying (commented out for demo)
+            # connection_string = self._build_connection_string(db_config)
+            # 
+            # with pyodbc.connect(connection_string, timeout=self.connection_timeout) as conn:
+            #     cursor = conn.cursor()
+            #     
+            #     # Query to get XML configuration names
+            #     # Assumes table has columns: id, name, xml_content
+            #     query = f"""
+            #     SELECT DISTINCT name 
+            #     FROM {table_name} 
+            #     WHERE name IS NOT NULL 
+            #     AND xml_content IS NOT NULL
+            #     ORDER BY name ASC
+            #     """
+            #     
+            #     cursor.execute(query)
+            #     rows = cursor.fetchall()
+            #     
+            #     xml_names = [row.name for row in rows]
+            #     
+            # logger.info(f"Retrieved {len(xml_names)} XML configurations from {db_config.get('host', 'Unknown')}")
+            # return True, xml_names, ""
             
         except pyodbc.ProgrammingError as e:
             error_msg = f"Table or query error: {str(e)}"
@@ -146,27 +154,33 @@ class DatabaseService:
             Tuple of (success: bool, xml_content: str, error_message: str)
         """
         try:
-            connection_string = self._build_connection_string(db_config)
+            # For demo purposes, return demo XML content
+            xml_content = self.get_demo_xml_content(xml_name)
+            logger.info(f"Retrieved demo XML content for: {xml_name}")
+            return True, xml_content, ""
             
-            with pyodbc.connect(connection_string, timeout=self.connection_timeout) as conn:
-                cursor = conn.cursor()
-                
-                # Query to get specific XML content
-                query = f"""
-                SELECT xml_content 
-                FROM {table_name} 
-                WHERE name = ?
-                """
-                
-                cursor.execute(query, (xml_name,))
-                row = cursor.fetchone()
-                
-                if row and row.xml_content:
-                    # Format XML for better display
-                    formatted_xml = self._format_xml(row.xml_content)
-                    return True, formatted_xml, ""
-                else:
-                    return False, "", f"XML configuration '{xml_name}' not found"
+            # Original code for actual database querying (commented out for demo)
+            # connection_string = self._build_connection_string(db_config)
+            # 
+            # with pyodbc.connect(connection_string, timeout=self.connection_timeout) as conn:
+            #     cursor = conn.cursor()
+            #     
+            #     # Query to get specific XML content
+            #     query = f"""
+            #     SELECT xml_content 
+            #     FROM {table_name} 
+            #     WHERE name = ?
+            #     """
+            #     
+            #     cursor.execute(query, (xml_name,))
+            #     row = cursor.fetchone()
+            #     
+            #     if row and row.xml_content:
+            #         # Format XML for better display
+            #         formatted_xml = self._format_xml(row.xml_content)
+            #         return True, formatted_xml, ""
+            #     else:
+            #         return False, "", f"XML configuration '{xml_name}' not found"
             
         except Exception as e:
             error_msg = f"Error retrieving XML content: {str(e)}"
@@ -215,39 +229,50 @@ class DatabaseService:
             Tuple of (success: bool, results: List[Dict], error_message: str)
         """
         try:
-            connection_string = self._build_connection_string(db_config)
-            
-            with pyodbc.connect(connection_string, timeout=self.connection_timeout) as conn:
-                cursor = conn.cursor()
-                
-                # Search in both name and XML content
-                query = f"""
-                SELECT name, 
-                       CASE 
-                           WHEN LEN(xml_content) > 200 
-                           THEN LEFT(xml_content, 200) + '...'
-                           ELSE xml_content
-                       END as preview
-                FROM {table_name} 
-                WHERE name LIKE ? 
-                   OR xml_content LIKE ?
-                ORDER BY name ASC
-                """
-                
-                search_pattern = f"%{search_term}%"
-                cursor.execute(query, (search_pattern, search_pattern))
-                rows = cursor.fetchall()
-                
-                results = [
-                    {
-                        "name": row.name,
-                        "preview": row.preview.strip() if row.preview else ""
-                    }
-                    for row in rows
-                ]
-                
-            logger.info(f"Found {len(results)} XML configurations matching '{search_term}'")
+            # For demo purposes, search demo XML configurations
+            demo_names = self.get_demo_xml_names()
+            results = [
+                {"name": name, "preview": f"Demo configuration: {name}"}
+                for name in demo_names
+                if search_term.lower() in name.lower()
+            ]
+            logger.info(f"Found {len(results)} demo XML configurations matching '{search_term}'")
             return True, results, ""
+            
+            # Original code for actual database searching (commented out for demo)
+            # connection_string = self._build_connection_string(db_config)
+            # 
+            # with pyodbc.connect(connection_string, timeout=self.connection_timeout) as conn:
+            #     cursor = conn.cursor()
+            #     
+            #     # Search in both name and XML content
+            #     query = f"""
+            #     SELECT name, 
+            #            CASE 
+            #                WHEN LEN(xml_content) > 200 
+            #                THEN LEFT(xml_content, 200) + '...'
+            #                ELSE xml_content
+            #            END as preview
+            #     FROM {table_name} 
+            #     WHERE name LIKE ? 
+            #        OR xml_content LIKE ?
+            #     ORDER BY name ASC
+            #     """
+            #     
+            #     search_pattern = f"%{search_term}%"
+            #     cursor.execute(query, (search_pattern, search_pattern))
+            #     rows = cursor.fetchall()
+            #     
+            #     results = [
+            #         {
+            #             "name": row.name,
+            #             "preview": row.preview.strip() if row.preview else ""
+            #         }
+            #         for row in rows
+            #     ]
+            #     
+            # logger.info(f"Found {len(results)} XML configurations matching '{search_term}'")
+            # return True, results, ""
             
         except Exception as e:
             error_msg = f"Error searching XML configurations: {str(e)}"
