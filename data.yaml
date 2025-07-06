@@ -1,0 +1,167 @@
+products:
+  - name: "E-Commerce Platform"
+    description: "Main e-commerce application"
+    bases:
+      - name: "Base Product"
+        description: "Standard e-commerce platform"
+        versions:
+          - name: "v1"
+            description: "Version 1.0"
+            environments:
+              - name: "dev"
+                site_url: "https://dev.ecommerce.company.com"
+                git_build_url: "https://github.com/company/ecommerce/tree/develop"
+                git_type: "branch"
+                databases:
+                  - name: "primary"
+                    server: "dev-db-primary.company.com"
+                    port: 1433
+                    database: "ecommerce_dev"
+                    status: "online"
+                  - name: "secondary"
+                    server: "dev-db-secondary.company.com"
+                    port: 1433
+                    database: "ecommerce_dev_replica"
+                    status: "online"
+                microservices:
+                  - name: "user-service"
+                    server_url: "https://user-service-dev.company.com"
+                    port: 8080
+                    git_build_url: "https://github.com/company/user-service/tree/develop"
+                    git_type: "branch"
+                    status: "online"
+                  - name: "order-service"
+                    server_url: "https://order-service-dev.company.com"
+                    port: 8081
+                    git_build_url: "https://github.com/company/order-service/tree/develop"
+                    git_type: "branch"
+                    status: "online"
+                  - name: "payment-service"
+                    server_url: "https://payment-service-dev.company.com"
+                    port: 8082
+                    git_build_url: "https://github.com/company/payment-service/tree/develop"
+                    git_type: "branch"
+                    status: "online"
+              - name: "qa"
+                site_url: "https://qa.ecommerce.company.com"
+                git_build_url: "https://github.com/company/ecommerce/tree/qa"
+                git_type: "branch"
+                databases:
+                  - name: "primary"
+                    server: "qa-db-primary.company.com"
+                    port: 1433
+                    database: "ecommerce_qa"
+                    status: "online"
+                microservices:
+                  - name: "user-service"
+                    server_url: "https://user-service-qa.company.com"
+                    port: 8080
+                    git_build_url: "https://github.com/company/user-service/tree/qa"
+                    git_type: "branch"
+                    status: "online"
+                  - name: "order-service"
+                    server_url: "https://order-service-qa.company.com"
+                    port: 8081
+                    git_build_url: "https://github.com/company/order-service/tree/qa"
+                    git_type: "branch"
+                    status: "online"
+              - name: "prod"
+                site_url: "https://ecommerce.company.com"
+                git_build_url: "https://github.com/company/ecommerce/releases/tag/v1.2.3"
+                git_type: "tag"
+                databases:
+                  - name: "primary"
+                    server: "prod-db-primary.company.com"
+                    port: 1433
+                    database: "ecommerce_prod"
+                    status: "online"
+                  - name: "secondary"
+                    server: "prod-db-secondary.company.com"
+                    port: 1433
+                    database: "ecommerce_prod_replica"
+                    status: "online"
+                microservices:
+                  - name: "user-service"
+                    server_url: "https://user-service.company.com"
+                    port: 8080
+                    git_build_url: "https://github.com/company/user-service/releases/tag/v1.2.1"
+                    git_type: "tag"
+                    status: "online"
+                  - name: "order-service"
+                    server_url: "https://order-service.company.com"
+                    port: 8081
+                    git_build_url: "https://github.com/company/order-service/releases/tag/v1.2.0"
+                    git_type: "tag"
+                    status: "online"
+          - name: "v2"
+            description: "Version 2.0 with enhanced features"
+            environments:
+              - name: "dev"
+                site_url: "https://v2-dev.ecommerce.company.com"
+                git_build_url: "https://github.com/company/ecommerce/tree/v2-develop"
+                git_type: "branch"
+                databases:
+                  - name: "primary"
+                    server: "v2-dev-db-primary.company.com"
+                    port: 1433
+                    database: "ecommerce_v2_dev"
+                    status: "online"
+                microservices:
+                  - name: "user-service"
+                    server_url: "https://v2-user-service-dev.company.com"
+                    port: 8080
+                    git_build_url: "https://github.com/company/user-service/tree/v2-develop"
+                    git_type: "branch"
+                    status: "online"
+                  - name: "order-service"
+                    server_url: "https://v2-order-service-dev.company.com"
+                    port: 8081
+                    git_build_url: "https://github.com/company/order-service/tree/v2-develop"
+                    git_type: "branch"
+                    status: "online"
+                  - name: "notification-service"
+                    server_url: "https://v2-notification-service-dev.company.com"
+                    port: 8083
+                    git_build_url: "https://github.com/company/notification-service/tree/develop"
+                    git_type: "branch"
+                    status: "online"
+      - name: "Client A Customized"
+        description: "Customized version for Client A"
+        versions:
+          - name: "v1"
+            description: "Client A Version 1.0"
+            environments:
+              - name: "uat"
+                site_url: "https://clienta-uat.ecommerce.company.com"
+                git_build_url: "https://github.com/company/ecommerce-clienta/tree/uat"
+                git_type: "branch"
+                databases:
+                  - name: "primary"
+                    server: "clienta-uat-db.company.com"
+                    port: 1433
+                    database: "ecommerce_clienta_uat"
+                    status: "online"
+                microservices:
+                  - name: "user-service"
+                    server_url: "https://clienta-user-service-uat.company.com"
+                    port: 8080
+                    git_build_url: "https://github.com/company/user-service/tree/clienta-uat"
+                    git_type: "branch"
+                    status: "online"
+              - name: "prod"
+                site_url: "https://clienta.ecommerce.company.com"
+                git_build_url: "https://github.com/company/ecommerce-clienta/releases/tag/v1.0.5"
+                git_type: "tag"
+                databases:
+                  - name: "primary"
+                    server: "clienta-prod-db.company.com"
+                    port: 1433
+                    database: "ecommerce_clienta_prod"
+                    status: "online"
+                microservices:
+                  - name: "user-service"
+                    server_url: "https://clienta-user-service.company.com"
+                    port: 8080
+                    git_build_url: "https://github.com/company/user-service/releases/tag/v1.0.3"
+                    git_type: "tag"
+                    status: "online"
