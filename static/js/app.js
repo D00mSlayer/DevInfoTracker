@@ -3,11 +3,11 @@ angular.module('productApp', [])
     .controller('ProductController', ['$scope', '$http', '$timeout', function($scope, $http, $timeout) {
         // Initialize scope variables
         $scope.products = [];
+        $scope.mainProduct = null;
+        $scope.selectedBase = null;
         $scope.searchQuery = '';
         $scope.searchResults = [];
         $scope.loading = true;
-        $scope.selectedProduct = null;
-        $scope.selectedVersions = {};
         $scope.selectedEnvironment = null;
         $scope.configSearchTerm = '';
         
@@ -15,12 +15,20 @@ angular.module('productApp', [])
         $scope.init = function() {
             if (typeof window.productData !== 'undefined') {
                 $scope.products = window.productData.products || [];
+                // Set the first (and likely only) product as the main product
+                if ($scope.products.length > 0) {
+                    $scope.mainProduct = $scope.products[0];
+                }
                 $scope.loading = false;
             } else {
                 // Fallback to API call
                 $http.get('/api/data')
                     .then(function(response) {
                         $scope.products = response.data.products || [];
+                        // Set the first product as main product
+                        if ($scope.products.length > 0) {
+                            $scope.mainProduct = $scope.products[0];
+                        }
                         $scope.loading = false;
                     })
                     .catch(function(error) {
@@ -91,10 +99,9 @@ angular.module('productApp', [])
             return gitType === 'branch' ? 'Branch' : 'Tag';
         };
         
-        // Product selection
-        $scope.selectProduct = function(product, index) {
-            $scope.selectedProduct = product;
-            $scope.selectedVersions = {};
+        // Base selection
+        $scope.selectBase = function(base, index) {
+            $scope.selectedBase = base;
         };
         
         // View environment details in modal

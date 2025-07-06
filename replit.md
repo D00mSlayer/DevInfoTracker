@@ -1,8 +1,8 @@
-# Product Environment Manager
+# AppLens
 
 ## Overview
 
-This is a Flask-based web application that manages and displays product environments in a hierarchical structure. The application provides a user-friendly interface to browse products, environments, and services, with search functionality to quickly find specific items within the hierarchy.
+AppLens is a Flask-based internal developer tool that provides environment and service management for a single product organization. The application offers a clean, desktop-optimized interface for developers to quickly access environment information, database configurations, microservice details, and perform configuration searches across XML files.
 
 ## System Architecture
 
@@ -70,10 +70,20 @@ Production deployment would require:
 - WSGI server configuration
 - Static file serving optimization
 
-## Changelog
+## Recent Changes
 
-- July 06, 2025. Initial setup
+- July 06, 2025: Redesigned interface for single-product organization
+  - Changed application name to "AppLens"
+  - Removed multi-product navigation in favor of base product selection
+  - Implemented desktop-optimized light theme design
+  - Added sticky sidebar navigation for better UX
+  - Enhanced environment cards with quick stats
+  - Maintained modal view for detailed environment information
 
 ## User Preferences
 
-Preferred communication style: Simple, everyday language.
+- Preferred communication style: Simple, everyday language
+- Application name: AppLens
+- Single product focus (not multi-product dashboard)
+- Desktop-only interface (no mobile support needed)
+- Light theme design preference
