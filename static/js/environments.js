@@ -178,24 +178,16 @@ angular.module('appLensApp')
                 });
         };
         
-        // View XML content
+        // View XML content in new tab
         $scope.viewXmlContent = function(xmlName) {
             if (!xmlName) return;
             
-            $scope.selectedXmlName = xmlName;
-            $scope.xmlContent = {
-                content: '',
-                loading: true,
-                error: null
-            };
+            console.log('Opening XML viewer in new tab for:', xmlName);
             
-            // If in demo mode, show demo content immediately
+            // If in demo mode, show demo content
             if ($scope.xmlConfigStatus.demoMode) {
-                console.log('Showing demo XML content for:', xmlName);
-                $scope.xmlContent.loading = false;
-                $scope.xmlContent.content = getDemoXmlContent(xmlName);
-                var modal = new bootstrap.Modal(document.getElementById('xmlContentModal'));
-                modal.show();
+                var content = getDemoXmlContent(xmlName);
+                openXmlViewer(xmlName, content);
                 return;
             }
             
@@ -214,20 +206,157 @@ angular.module('appLensApp')
             
             $http.post('/api/database/xml-content', payload)
                 .then(function(response) {
-                    $scope.xmlContent.loading = false;
                     if (response.data.success) {
-                        $scope.xmlContent.content = response.data.xml_content;
-                        var modal = new bootstrap.Modal(document.getElementById('xmlContentModal'));
-                        modal.show();
+                        openXmlViewer(xmlName, response.data.xml_content);
                     } else {
-                        $scope.xmlContent.error = response.data.error;
+                        alert('Error loading XML: ' + response.data.error);
                     }
                 }).catch(function(error) {
-                    $scope.xmlContent.loading = false;
-                    $scope.xmlContent.error = 'Failed to load XML content';
+                    alert('Error loading XML content');
                     console.error('Error loading XML content:', error);
                 });
         };
+        
+        // Open XML viewer in new tab
+        function openXmlViewer(xmlName, content) {
+            var newWindow = window.open('', '_blank');
+            newWindow.document.write(getXmlViewerHtml(xmlName, content));
+            newWindow.document.close();
+        }
+        
+        // Generate HTML for XML viewer with collapse/expand functionality
+        function getXmlViewerHtml(xmlName, content) {
+            return `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>XML Viewer - ${xmlName}</title>
+    <link href="https://cdn.replit.com/agent/bootstrap-agent-dark-theme.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .xml-content {
+            font-family: 'Courier New', monospace;
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 0.375rem;
+            padding: 1rem;
+            margin: 1rem 0;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        .xml-tag {
+            color: #0066cc;
+            font-weight: bold;
+        }
+        .xml-attribute {
+            color: #cc6600;
+        }
+        .xml-value {
+            color: #006600;
+        }
+        .collapsible {
+            cursor: pointer;
+            user-select: none;
+        }
+        .collapsible:hover {
+            background-color: #e9ecef;
+        }
+        .collapsed-content {
+            display: none;
+        }
+        .expand-all-btn, .collapse-all-btn {
+            margin: 0.25rem;
+        }
+    </style>
+</head>
+<body class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="fas fa-file-code me-2"></i>XML Configuration: ${xmlName}</h2>
+        <div>
+            <button class="btn btn-sm btn-outline-primary expand-all-btn" onclick="expandAll()">
+                <i class="fas fa-expand me-1"></i>Expand All
+            </button>
+            <button class="btn btn-sm btn-outline-secondary collapse-all-btn" onclick="collapseAll()">
+                <i class="fas fa-compress me-1"></i>Collapse All
+            </button>
+            <button class="btn btn-sm btn-success" onclick="downloadXml()">
+                <i class="fas fa-download me-1"></i>Download
+            </button>
+            <button class="btn btn-sm btn-secondary" onclick="window.close()">
+                <i class="fas fa-times me-1"></i>Close
+            </button>
+        </div>
+    </div>
+    
+    <div class="xml-content" id="xmlContent">${formatXmlWithCollapse(content)}</div>
+
+    <script>
+        const xmlName = '${xmlName}';
+        const xmlContent = \`${content.replace(/`/g, '\\`')}\`;
+        
+        function expandAll() {
+            document.querySelectorAll('.collapsed-content').forEach(el => {
+                el.style.display = 'block';
+            });
+            document.querySelectorAll('.collapsible .fas').forEach(el => {
+                el.className = 'fas fa-chevron-down me-1';
+            });
+        }
+        
+        function collapseAll() {
+            document.querySelectorAll('.collapsed-content').forEach(el => {
+                el.style.display = 'none';
+            });
+            document.querySelectorAll('.collapsible .fas').forEach(el => {
+                el.className = 'fas fa-chevron-right me-1';
+            });
+        }
+        
+        function toggleSection(element) {
+            const content = element.nextElementSibling;
+            const icon = element.querySelector('.fas');
+            
+            if (content.style.display === 'none') {
+                content.style.display = 'block';
+                icon.className = 'fas fa-chevron-down me-1';
+            } else {
+                content.style.display = 'none';
+                icon.className = 'fas fa-chevron-right me-1';
+            }
+        }
+        
+        function downloadXml() {
+            const blob = new Blob([xmlContent], { type: 'application/xml' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = xmlName;
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+        }
+    </script>
+</body>
+</html>`;
+        }
+        
+        // Format XML with collapsible sections
+        function formatXmlWithCollapse(xml) {
+            // Escape HTML entities
+            xml = xml.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            
+            // Add syntax highlighting and collapsible functionality
+            return xml
+                .replace(/(&lt;\/)([^&\s]+)(&gt;)/g, '<span class="xml-tag">$1$2$3</span>')
+                .replace(/(&lt;)([^&\s\/]+)/g, '<span class="xml-tag">$1$2</span>')
+                .replace(/(&gt;)/g, '<span class="xml-tag">$1</span>')
+                .replace(/(\w+)(\s*=\s*)("[^"]*")/g, '<span class="xml-attribute">$1</span>$2<span class="xml-value">$3</span>');
+        }
         
         // Get demo XML content
         function getDemoXmlContent(xmlName) {

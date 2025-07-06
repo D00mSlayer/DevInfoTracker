@@ -323,38 +323,3 @@
     </div>
 </div>
 
-<!-- XML Content Modal -->
-<div class="modal fade" id="xmlContentModal" tabindex="-1">
-    <div class="modal-dialog modal-xl">
-        <div class="modal-content">
-            <div class="modal-header bg-info text-white">
-                <h5 class="modal-title">
-                    <i class="fas fa-file-code me-2"></i>
-                    XML Configuration: {{selectedXmlName}}
-                </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <div ng-if="xmlContent.loading" class="text-center">
-                    <div class="spinner-border" role="status">
-                        <span class="visually-hidden">Loading...</span>
-                    </div>
-                    <p class="mt-2">Loading XML content...</p>
-                </div>
-                <div ng-if="xmlContent.error" class="alert alert-danger">
-                    <i class="fas fa-exclamation-circle me-2"></i>
-                    {{xmlContent.error}}
-                </div>
-                <div ng-if="xmlContent.content && !xmlContent.loading">
-                    <pre class="bg-light p-3 rounded" style="max-height: 400px; overflow-y: auto;"><code>{{xmlContent.content}}</code></pre>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-success" ng-click="downloadXmlContent(selectedXmlName)" ng-disabled="!selectedXmlName">
-                    <i class="fas fa-download me-1"></i>Download
-                </button>
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-            </div>
-        </div>
-    </div>
-</div>
