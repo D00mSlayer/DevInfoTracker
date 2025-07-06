@@ -1,0 +1,358 @@
+"""
+Database Service for Environment Configuration Management
+Handles MSSQL connectivity and XML configuration retrieval
+"""
+
+import os
+import logging
+import pyodbc
+from typing import Dict, List, Optional, Tuple
+import xml.etree.ElementTree as ET
+from xml.dom import minidom
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+class DatabaseService:
+    """Service for managing database connections and XML configurations"""
+    
+    def __init__(self):
+        # MSSQL connection settings
+        self.connection_timeout = 10
+        self.query_timeout = 30
+    
+    def _build_connection_string(self, db_config: Dict) -> str:
+        """
+        Build MSSQL connection string from database configuration
+        
+        Args:
+            db_config: Database configuration dictionary
+            
+        Returns:
+            ODBC connection string
+        """
+        host = db_config.get('host', 'localhost')
+        port = db_config.get('port', 1433)
+        database = db_config.get('database', 'master')
+        username = db_config.get('username', '')
+        password = db_config.get('password', '')
+        
+        # Handle named instances (e.g., server\instance)
+        if '\\' in host:
+            server_part = host
+        else:
+            server_part = f"{host},{port}" if port != 1433 else host
+        
+        connection_string = (
+            f"DRIVER={{ODBC Driver 17 for SQL Server}};"
+            f"SERVER={server_part};"
+            f"DATABASE={database};"
+            f"UID={username};"
+            f"PWD={password};"
+            f"TIMEOUT={self.connection_timeout};"
+        )
+        
+        return connection_string
+    
+    def test_database_connection(self, db_config: Dict) -> Tuple[bool, str]:
+        """
+        Test database connectivity
+        
+        Args:
+            db_config: Database configuration dictionary
+            
+        Returns:
+            Tuple of (success: bool, message: str)
+        """
+        try:
+            connection_string = self._build_connection_string(db_config)
+            
+            with pyodbc.connect(connection_string, timeout=self.connection_timeout) as conn:
+                cursor = conn.cursor()
+                cursor.execute("SELECT 1")
+                cursor.fetchone()
+                
+            logger.info(f"Successfully connected to database: {db_config.get('host', 'Unknown')}")
+            return True, "Connection successful"
+            
+        except pyodbc.OperationalError as e:
+            error_msg = f"Connection failed: {str(e)}"
+            logger.error(error_msg)
+            return False, error_msg
+        except Exception as e:
+            error_msg = f"Unexpected error: {str(e)}"
+            logger.error(error_msg)
+            return False, error_msg
+    
+    def get_xml_configurations(self, db_config: Dict, table_name: str = "configurations") -> Tuple[bool, List[str], str]:
+        """
+        Fetch XML configuration names from database
+        
+        Args:
+            db_config: Database configuration dictionary
+            table_name: Name of the table containing XML configurations
+            
+        Returns:
+            Tuple of (success: bool, xml_names: List[str], error_message: str)
+        """
+        try:
+            connection_string = self._build_connection_string(db_config)
+            
+            with pyodbc.connect(connection_string, timeout=self.connection_timeout) as conn:
+                cursor = conn.cursor()
+                
+                # Query to get XML configuration names
+                # Assumes table has columns: id, name, xml_content
+                query = f"""
+                SELECT DISTINCT name 
+                FROM {table_name} 
+                WHERE name IS NOT NULL 
+                AND xml_content IS NOT NULL
+                ORDER BY name ASC
+                """
+                
+                cursor.execute(query)
+                rows = cursor.fetchall()
+                
+                xml_names = [row.name for row in rows]
+                
+            logger.info(f"Retrieved {len(xml_names)} XML configurations from {db_config.get('host', 'Unknown')}")
+            return True, xml_names, ""
+            
+        except pyodbc.ProgrammingError as e:
+            error_msg = f"Table or query error: {str(e)}"
+            logger.error(error_msg)
+            return False, [], error_msg
+        except pyodbc.OperationalError as e:
+            error_msg = f"Database connection error: {str(e)}"
+            logger.error(error_msg)
+            return False, [], error_msg
+        except Exception as e:
+            error_msg = f"Unexpected error: {str(e)}"
+            logger.error(error_msg)
+            return False, [], error_msg
+    
+    def get_xml_content(self, db_config: Dict, xml_name: str, table_name: str = "configurations") -> Tuple[bool, str, str]:
+        """
+        Fetch specific XML configuration content
+        
+        Args:
+            db_config: Database configuration dictionary
+            xml_name: Name of the XML configuration to retrieve
+            table_name: Name of the table containing XML configurations
+            
+        Returns:
+            Tuple of (success: bool, xml_content: str, error_message: str)
+        """
+        try:
+            connection_string = self._build_connection_string(db_config)
+            
+            with pyodbc.connect(connection_string, timeout=self.connection_timeout) as conn:
+                cursor = conn.cursor()
+                
+                # Query to get specific XML content
+                query = f"""
+                SELECT xml_content 
+                FROM {table_name} 
+                WHERE name = ?
+                """
+                
+                cursor.execute(query, (xml_name,))
+                row = cursor.fetchone()
+                
+                if row and row.xml_content:
+                    # Format XML for better display
+                    formatted_xml = self._format_xml(row.xml_content)
+                    return True, formatted_xml, ""
+                else:
+                    return False, "", f"XML configuration '{xml_name}' not found"
+            
+        except Exception as e:
+            error_msg = f"Error retrieving XML content: {str(e)}"
+            logger.error(error_msg)
+            return False, "", error_msg
+    
+    def _format_xml(self, xml_content: str) -> str:
+        """
+        Format XML content for better readability
+        
+        Args:
+            xml_content: Raw XML content string
+            
+        Returns:
+            Formatted XML string
+        """
+        try:
+            # Parse and pretty-print XML
+            root = ET.fromstring(xml_content)
+            rough_string = ET.tostring(root, 'utf-8')
+            reparsed = minidom.parseString(rough_string)
+            pretty_xml = reparsed.toprettyxml(indent="  ")
+            
+            # Remove empty lines and clean up
+            lines = [line for line in pretty_xml.split('\n') if line.strip()]
+            return '\n'.join(lines)
+            
+        except ET.ParseError:
+            # If XML parsing fails, return original content
+            logger.warning("XML parsing failed, returning original content")
+            return xml_content
+        except Exception as e:
+            logger.error(f"Error formatting XML: {e}")
+            return xml_content
+    
+    def search_xml_configurations(self, db_config: Dict, search_term: str, table_name: str = "configurations") -> Tuple[bool, List[Dict], str]:
+        """
+        Search XML configurations by name or content
+        
+        Args:
+            db_config: Database configuration dictionary
+            search_term: Term to search for
+            table_name: Name of the table containing XML configurations
+            
+        Returns:
+            Tuple of (success: bool, results: List[Dict], error_message: str)
+        """
+        try:
+            connection_string = self._build_connection_string(db_config)
+            
+            with pyodbc.connect(connection_string, timeout=self.connection_timeout) as conn:
+                cursor = conn.cursor()
+                
+                # Search in both name and XML content
+                query = f"""
+                SELECT name, 
+                       CASE 
+                           WHEN LEN(xml_content) > 200 
+                           THEN LEFT(xml_content, 200) + '...'
+                           ELSE xml_content
+                       END as preview
+                FROM {table_name} 
+                WHERE name LIKE ? 
+                   OR xml_content LIKE ?
+                ORDER BY name ASC
+                """
+                
+                search_pattern = f"%{search_term}%"
+                cursor.execute(query, (search_pattern, search_pattern))
+                rows = cursor.fetchall()
+                
+                results = [
+                    {
+                        "name": row.name,
+                        "preview": row.preview.strip() if row.preview else ""
+                    }
+                    for row in rows
+                ]
+                
+            logger.info(f"Found {len(results)} XML configurations matching '{search_term}'")
+            return True, results, ""
+            
+        except Exception as e:
+            error_msg = f"Error searching XML configurations: {str(e)}"
+            logger.error(error_msg)
+            return False, [], error_msg
+
+    def get_demo_xml_names(self) -> List[str]:
+        """
+        Get demo XML configuration names for testing
+        
+        Returns:
+            List of demo XML names
+        """
+        return [
+            "app-config.xml",
+            "database-settings.xml",
+            "email-templates.xml",
+            "logging-config.xml",
+            "security-policies.xml",
+            "service-endpoints.xml",
+            "user-permissions.xml",
+            "validation-rules.xml"
+        ]
+    
+    def get_demo_xml_content(self, xml_name: str) -> str:
+        """
+        Get demo XML content for testing
+        
+        Args:
+            xml_name: Name of the demo XML file
+            
+        Returns:
+            Demo XML content string
+        """
+        demo_configs = {
+            "app-config.xml": """<?xml version="1.0" encoding="UTF-8"?>
+<application>
+    <settings>
+        <environment>production</environment>
+        <debug>false</debug>
+        <version>2.1.0</version>
+    </settings>
+    <features>
+        <feature name="authentication" enabled="true"/>
+        <feature name="logging" enabled="true"/>
+        <feature name="caching" enabled="true"/>
+    </features>
+</application>""",
+            
+            "database-settings.xml": """<?xml version="1.0" encoding="UTF-8"?>
+<database>
+    <connections>
+        <connection name="primary">
+            <server>sql-primary.company.com</server>
+            <database>production_db</database>
+            <timeout>30</timeout>
+        </connection>
+        <connection name="secondary">
+            <server>sql-secondary.company.com</server>
+            <database>production_db</database>
+            <timeout>30</timeout>
+        </connection>
+    </connections>
+    <pooling>
+        <minSize>5</minSize>
+        <maxSize>100</maxSize>
+    </pooling>
+</database>""",
+            
+            "security-policies.xml": """<?xml version="1.0" encoding="UTF-8"?>
+<security>
+    <authentication>
+        <method>OAuth2</method>
+        <tokenExpiry>3600</tokenExpiry>
+        <refreshTokenExpiry>86400</refreshTokenExpiry>
+    </authentication>
+    <authorization>
+        <roles>
+            <role name="admin" permissions="all"/>
+            <role name="user" permissions="read,write"/>
+            <role name="guest" permissions="read"/>
+        </roles>
+    </authorization>
+</security>""",
+            
+            "logging-config.xml": """<?xml version="1.0" encoding="UTF-8"?>
+<logging>
+    <level>INFO</level>
+    <appenders>
+        <appender name="file" type="RollingFile">
+            <pattern>%d{ISO8601} [%thread] %-5level %logger{36} - %msg%n</pattern>
+            <fileName>logs/application.log</fileName>
+            <maxFileSize>10MB</maxFileSize>
+            <maxFiles>10</maxFiles>
+        </appender>
+        <appender name="console" type="Console">
+            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+        </appender>
+    </appenders>
+</logging>"""
+        }
+        
+        return demo_configs.get(xml_name, f"""<?xml version="1.0" encoding="UTF-8"?>
+<configuration name="{xml_name}">
+    <demo>true</demo>
+    <message>This is a demo configuration file</message>
+    <timestamp>{xml_name}</timestamp>
+</configuration>""")

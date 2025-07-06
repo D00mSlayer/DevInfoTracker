@@ -44,12 +44,230 @@ angular.module('appLensApp')
             SharedDataService.setSelectedEnvironment(environment);
             var modal = new bootstrap.Modal(document.getElementById('environmentModal'));
             modal.show();
+            
+            // Initialize database and XML management when modal opens
+            $scope.initializeDatabaseAndXml(environment);
         };
         
-        // Configuration search
-        $scope.searchConfigurations = function(environment, searchTerm) {
-            console.log('Searching configurations for:', environment, 'term:', searchTerm);
-            alert('Configuration search feature will search through XML files in the database for: ' + searchTerm);
+        // Initialize database connectivity and XML management
+        $scope.initializeDatabaseAndXml = function(environment) {
+            $scope.databaseStatus = {
+                checking: true,
+                checked: false,
+                connected: false,
+                error: null,
+                database: null
+            };
+            
+            $scope.xmlConfigStatus = {
+                xmlNames: [],
+                demoMode: false,
+                loading: false
+            };
+            
+            $scope.selectedXmlName = '';
+            $scope.searchResults = [];
+            $scope.xmlContent = {
+                content: '',
+                loading: false,
+                error: null
+            };
+            
+            // Check database connectivity
+            if (environment && environment.database && environment.database.primary) {
+                $scope.checkDatabaseConnection(environment.database.primary);
+            } else {
+                $scope.databaseStatus.checking = false;
+                $scope.databaseStatus.checked = true;
+                $scope.databaseStatus.connected = false;
+                $scope.databaseStatus.error = 'No primary database configuration found';
+                // Load demo XML configurations
+                $scope.loadXmlConfigurations(false, true);
+            }
+        };
+        
+        // Check database connectivity
+        $scope.checkDatabaseConnection = function(dbConfig) {
+            $scope.databaseStatus.checking = true;
+            
+            $http.post('/api/database/test', {
+                database_config: dbConfig
+            }).then(function(response) {
+                $scope.databaseStatus.checking = false;
+                $scope.databaseStatus.checked = true;
+                $scope.databaseStatus.connected = response.data.success;
+                $scope.databaseStatus.database = response.data.database;
+                $scope.databaseStatus.error = response.data.message;
+                
+                if (response.data.success) {
+                    // Load XML configurations from database
+                    $scope.loadXmlConfigurations(false, false);
+                } else {
+                    // Load demo XML configurations
+                    $scope.loadXmlConfigurations(false, true);
+                }
+            }).catch(function(error) {
+                $scope.databaseStatus.checking = false;
+                $scope.databaseStatus.checked = true;
+                $scope.databaseStatus.connected = false;
+                $scope.databaseStatus.error = 'Connection test failed';
+                console.error('Database connection test failed:', error);
+                // Load demo XML configurations
+                $scope.loadXmlConfigurations(false, true);
+            });
+        };
+        
+        // Get database status CSS class
+        $scope.getDatabaseStatusClass = function() {
+            if ($scope.databaseStatus.checking) {
+                return 'bg-warning text-dark';
+            } else if ($scope.databaseStatus.connected) {
+                return 'bg-success text-white';
+            } else {
+                return 'bg-danger text-white';
+            }
+        };
+        
+        // Load XML configurations
+        $scope.loadXmlConfigurations = function(refresh, useDemo) {
+            $scope.xmlConfigStatus.loading = true;
+            
+            var environment = SharedDataService.getSelectedEnvironment();
+            var payload = {
+                use_demo: useDemo || false
+            };
+            
+            if (!useDemo && environment && environment.database && environment.database.primary) {
+                payload.database_config = environment.database.primary;
+            }
+            
+            $http.post('/api/database/xml-configs', payload)
+                .then(function(response) {
+                    $scope.xmlConfigStatus.loading = false;
+                    if (response.data.success) {
+                        $scope.xmlConfigStatus.xmlNames = response.data.xml_names;
+                        $scope.xmlConfigStatus.demoMode = response.data.demo_mode;
+                    } else {
+                        console.error('Failed to load XML configurations:', response.data.error);
+                        $scope.xmlConfigStatus.xmlNames = [];
+                        $scope.xmlConfigStatus.demoMode = false;
+                    }
+                }).catch(function(error) {
+                    $scope.xmlConfigStatus.loading = false;
+                    console.error('Error loading XML configurations:', error);
+                    $scope.xmlConfigStatus.xmlNames = [];
+                    $scope.xmlConfigStatus.demoMode = false;
+                });
+        };
+        
+        // View XML content
+        $scope.viewXmlContent = function(xmlName) {
+            if (!xmlName) return;
+            
+            $scope.selectedXmlName = xmlName;
+            $scope.xmlContent = {
+                content: '',
+                loading: true,
+                error: null
+            };
+            
+            var environment = SharedDataService.getSelectedEnvironment();
+            var payload = {
+                xml_name: xmlName,
+                use_demo: $scope.xmlConfigStatus.demoMode
+            };
+            
+            if (!$scope.xmlConfigStatus.demoMode && environment && environment.database && environment.database.primary) {
+                payload.database_config = environment.database.primary;
+            }
+            
+            $http.post('/api/database/xml-content', payload)
+                .then(function(response) {
+                    $scope.xmlContent.loading = false;
+                    if (response.data.success) {
+                        $scope.xmlContent.content = response.data.xml_content;
+                        var modal = new bootstrap.Modal(document.getElementById('xmlContentModal'));
+                        modal.show();
+                    } else {
+                        $scope.xmlContent.error = response.data.error;
+                    }
+                }).catch(function(error) {
+                    $scope.xmlContent.loading = false;
+                    $scope.xmlContent.error = 'Failed to load XML content';
+                    console.error('Error loading XML content:', error);
+                });
+        };
+        
+        // Download XML content
+        $scope.downloadXmlContent = function(xmlName) {
+            if (!xmlName) return;
+            
+            var environment = SharedDataService.getSelectedEnvironment();
+            var payload = {
+                xml_name: xmlName,
+                use_demo: $scope.xmlConfigStatus.demoMode
+            };
+            
+            if (!$scope.xmlConfigStatus.demoMode && environment && environment.database && environment.database.primary) {
+                payload.database_config = environment.database.primary;
+            }
+            
+            // Create a form to submit the POST request for download
+            var form = document.createElement('form');
+            form.method = 'POST';
+            form.action = '/api/database/xml-download';
+            form.style.display = 'none';
+            
+            // Add form data
+            for (var key in payload) {
+                var input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = key;
+                input.value = typeof payload[key] === 'object' ? JSON.stringify(payload[key]) : payload[key];
+                form.appendChild(input);
+            }
+            
+            document.body.appendChild(form);
+            form.submit();
+            document.body.removeChild(form);
+        };
+        
+        // Search XML configurations
+        $scope.searchXmlConfigurations = function(searchTerm) {
+            if (!searchTerm) {
+                $scope.searchResults = [];
+                return;
+            }
+            
+            var environment = SharedDataService.getSelectedEnvironment();
+            var payload = {
+                search_term: searchTerm,
+                use_demo: $scope.xmlConfigStatus.demoMode
+            };
+            
+            if (!$scope.xmlConfigStatus.demoMode && environment && environment.database && environment.database.primary) {
+                payload.database_config = environment.database.primary;
+            }
+            
+            $http.post('/api/database/xml-search', payload)
+                .then(function(response) {
+                    if (response.data.success) {
+                        $scope.searchResults = response.data.results;
+                    } else {
+                        $scope.searchResults = [];
+                        console.error('Search failed:', response.data.error);
+                    }
+                }).catch(function(error) {
+                    $scope.searchResults = [];
+                    console.error('Error searching XML configurations:', error);
+                });
+        };
+        
+        // Select search result
+        $scope.selectSearchResult = function(xmlName) {
+            $scope.selectedXmlName = xmlName;
+            $scope.searchResults = [];
+            $scope.configSearchTerm = '';
         };
         
 

@@ -240,29 +240,92 @@
                     </div>
                 </div>
                 
-                <!-- Configuration Search -->
+                <!-- Database Status -->
                 <div class="row mt-3">
                     <div class="col-12">
-                        <div class="card">
-                            <div class="card-header bg-light">
+                        <div class="card mb-3">
+                            <div class="card-header" ng-class="getDatabaseStatusClass()">
                                 <h6 class="mb-0">
-                                    <i class="fas fa-search me-2"></i>
-                                    Configuration Search
+                                    <i class="fas fa-database me-1"></i>
+                                    Primary Database Status
+                                    <span ng-if="databaseStatus.checking" class="spinner-border spinner-border-sm ms-2"></span>
                                 </h6>
                             </div>
                             <div class="card-body">
-                                <div class="input-group">
-                                    <input type="text" class="form-control" placeholder="Search XML configurations..." 
-                                           ng-model="configSearchTerm">
-                                    <button class="btn btn-primary" ng-click="searchConfigurations(selectedEnvironment, configSearchTerm)">
-                                        <i class="fas fa-search me-1"></i>
-                                        Search Configurations
+                                <div ng-if="databaseStatus.checked && databaseStatus.connected" class="text-success">
+                                    <i class="fas fa-check-circle me-1"></i>
+                                    Connected to {{databaseStatus.database}}
+                                </div>
+                                <div ng-if="databaseStatus.checked && !databaseStatus.connected" class="text-danger">
+                                    <i class="fas fa-times-circle me-1"></i>
+                                    Connection failed: {{databaseStatus.error}}
+                                </div>
+                                <div ng-if="!databaseStatus.checked" class="text-muted">
+                                    <i class="fas fa-clock me-1"></i>
+                                    Checking database connectivity...
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- XML Configuration Management -->
+                <div class="row mt-3">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header bg-info text-white">
+                                <h6 class="mb-0">
+                                    <i class="fas fa-file-code me-1"></i>
+                                    XML Configuration Management
+                                </h6>
+                            </div>
+                            <div class="card-body">
+                                <!-- XML Selection -->
+                                <div class="mb-3">
+                                    <label class="form-label">Available XML Configurations:</label>
+                                    <select class="form-select" ng-model="selectedXmlName" ng-disabled="!databaseStatus.connected && !xmlConfigStatus.demoMode" ng-options="xml for xml in xmlConfigStatus.xmlNames">
+                                        <option value="">Select an XML configuration...</option>
+                                    </select>
+                                    <div ng-if="xmlConfigStatus.demoMode" class="alert alert-info mt-2 p-2">
+                                        <small><i class="fas fa-info-circle me-1"></i>Demo mode - showing sample configurations</small>
+                                    </div>
+                                </div>
+                                
+                                <!-- Actions -->
+                                <div class="d-flex gap-2 mb-3 flex-wrap">
+                                    <button class="btn btn-primary btn-sm" ng-click="viewXmlContent(selectedXmlName)" ng-disabled="!selectedXmlName">
+                                        <i class="fas fa-eye me-1"></i>View
+                                    </button>
+                                    <button class="btn btn-success btn-sm" ng-click="downloadXmlContent(selectedXmlName)" ng-disabled="!selectedXmlName">
+                                        <i class="fas fa-download me-1"></i>Download
+                                    </button>
+                                    <button class="btn btn-outline-secondary btn-sm" ng-click="loadXmlConfigurations(true)">
+                                        <i class="fas fa-sync-alt me-1"></i>Refresh
+                                    </button>
+                                    <button class="btn btn-outline-info btn-sm" ng-click="loadXmlConfigurations(false, true)">
+                                        <i class="fas fa-flask me-1"></i>Demo
                                     </button>
                                 </div>
-                                <small class="text-muted mt-2 d-block">
-                                    <i class="fas fa-info-circle me-1"></i>
-                                    Search through ~200 XML configuration files in the primary database
-                                </small>
+                                
+                                <!-- Search -->
+                                <div class="input-group mb-3">
+                                    <input type="text" class="form-control" placeholder="Search XML configurations..." ng-model="configSearchTerm" ng-disabled="!databaseStatus.connected && !xmlConfigStatus.demoMode">
+                                    <button class="btn btn-info" ng-click="searchXmlConfigurations(configSearchTerm)" ng-disabled="!configSearchTerm || (!databaseStatus.connected && !xmlConfigStatus.demoMode)">
+                                        <i class="fas fa-search"></i>
+                                    </button>
+                                </div>
+                                <small class="text-muted">Search through XML configuration files in the database</small>
+                                
+                                <!-- Search Results -->
+                                <div ng-if="searchResults.length > 0" class="mt-3">
+                                    <h6>Search Results:</h6>
+                                    <div class="list-group">
+                                        <button class="list-group-item list-group-item-action" ng-repeat="result in searchResults" ng-click="selectSearchResult(result.name)">
+                                            <strong>{{result.name}}</strong>
+                                            <p class="mb-1 text-muted small">{{result.preview}}</p>
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -271,6 +334,43 @@
         </div>
     </div>
 </div>
+
+<!-- XML Content Modal -->
+<div class="modal fade" id="xmlContentModal" tabindex="-1">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header bg-info text-white">
+                <h5 class="modal-title">
+                    <i class="fas fa-file-code me-2"></i>
+                    XML Configuration: {{selectedXmlName}}
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div ng-if="xmlContent.loading" class="text-center">
+                    <div class="spinner-border" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p class="mt-2">Loading XML content...</p>
+                </div>
+                <div ng-if="xmlContent.error" class="alert alert-danger">
+                    <i class="fas fa-exclamation-circle me-2"></i>
+                    {{xmlContent.error}}
+                </div>
+                <div ng-if="xmlContent.content && !xmlContent.loading">
+                    <pre class="bg-light p-3 rounded" style="max-height: 400px; overflow-y: auto;"><code>{{xmlContent.content}}</code></pre>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-success" ng-click="downloadXmlContent(selectedXmlName)" ng-disabled="!selectedXmlName">
+                    <i class="fas fa-download me-1"></i>Download
+                </button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 [% endblock %]
 
 [% block scripts %]

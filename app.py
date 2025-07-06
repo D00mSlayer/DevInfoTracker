@@ -1,9 +1,10 @@
 import os
 import yaml
 import logging
-from flask import Flask, render_template, jsonify, request
+from flask import Flask, render_template, jsonify, request, Response
 from flask_cors import CORS
 from jira_gitlab_service import JiraGitLabService
+from database_service import DatabaseService
 
 # Configure logging
 logging.basicConfig(level=logging.DEBUG)
@@ -21,8 +22,9 @@ app.jinja_env.block_end_string = '%]'
 # Enable CORS for API endpoints
 CORS(app)
 
-# Initialize Jira GitLab service
+# Initialize services
 jira_gitlab_service = JiraGitLabService()
+database_service = DatabaseService()
 
 def load_data():
     """Load data from YAML file"""
@@ -174,6 +176,180 @@ def jira_config_status():
     except Exception as e:
         logging.error(f"Error checking configuration: {e}")
         return jsonify({"error": "Failed to check configuration"}), 500
+
+@app.route('/api/database/test', methods=['POST'])
+def test_database_connection():
+    """API endpoint to test database connectivity"""
+    try:
+        data = request.get_json()
+        db_config = data.get('database_config')
+        
+        if not db_config:
+            return jsonify({"error": "No database configuration provided"}), 400
+        
+        success, message = database_service.test_database_connection(db_config)
+        
+        return jsonify({
+            "success": success,
+            "message": message,
+            "database": f"{db_config.get('host', 'Unknown')}\\{db_config.get('database', 'Unknown')}"
+        })
+        
+    except Exception as e:
+        logging.error(f"Error testing database connection: {e}")
+        return jsonify({"error": "Internal server error"}), 500
+
+@app.route('/api/database/xml-configs', methods=['POST'])
+def get_xml_configurations():
+    """API endpoint to get XML configuration names"""
+    try:
+        data = request.get_json()
+        db_config = data.get('database_config')
+        use_demo = data.get('use_demo', False)
+        
+        if use_demo:
+            xml_names = database_service.get_demo_xml_names()
+            return jsonify({
+                "success": True,
+                "xml_names": xml_names,
+                "demo_mode": True
+            })
+        
+        if not db_config:
+            return jsonify({"error": "No database configuration provided"}), 400
+        
+        success, xml_names, error_msg = database_service.get_xml_configurations(db_config)
+        
+        return jsonify({
+            "success": success,
+            "xml_names": xml_names,
+            "error": error_msg,
+            "demo_mode": False
+        })
+        
+    except Exception as e:
+        logging.error(f"Error retrieving XML configurations: {e}")
+        return jsonify({"error": "Internal server error"}), 500
+
+@app.route('/api/database/xml-content', methods=['POST'])
+def get_xml_content():
+    """API endpoint to get specific XML content"""
+    try:
+        data = request.get_json()
+        db_config = data.get('database_config')
+        xml_name = data.get('xml_name')
+        use_demo = data.get('use_demo', False)
+        
+        if not xml_name:
+            return jsonify({"error": "No XML name provided"}), 400
+        
+        if use_demo:
+            xml_content = database_service.get_demo_xml_content(xml_name)
+            return jsonify({
+                "success": True,
+                "xml_content": xml_content,
+                "xml_name": xml_name,
+                "demo_mode": True
+            })
+        
+        if not db_config:
+            return jsonify({"error": "No database configuration provided"}), 400
+        
+        success, xml_content, error_msg = database_service.get_xml_content(db_config, xml_name)
+        
+        return jsonify({
+            "success": success,
+            "xml_content": xml_content,
+            "xml_name": xml_name,
+            "error": error_msg,
+            "demo_mode": False
+        })
+        
+    except Exception as e:
+        logging.error(f"Error retrieving XML content: {e}")
+        return jsonify({"error": "Internal server error"}), 500
+
+@app.route('/api/database/xml-download', methods=['POST'])
+def download_xml_content():
+    """API endpoint to download XML content as file"""
+    try:
+        data = request.get_json()
+        db_config = data.get('database_config')
+        xml_name = data.get('xml_name')
+        use_demo = data.get('use_demo', False)
+        
+        if not xml_name:
+            return jsonify({"error": "No XML name provided"}), 400
+        
+        if use_demo:
+            xml_content = database_service.get_demo_xml_content(xml_name)
+            success = True
+            error_msg = ""
+        else:
+            if not db_config:
+                return jsonify({"error": "No database configuration provided"}), 400
+            success, xml_content, error_msg = database_service.get_xml_content(db_config, xml_name)
+        
+        if not success:
+            return jsonify({"error": error_msg}), 500
+        
+        # Create file response
+        response = Response(
+            xml_content,
+            mimetype='application/xml',
+            headers={
+                'Content-Disposition': f'attachment; filename="{xml_name}"',
+                'Content-Type': 'application/xml; charset=utf-8'
+            }
+        )
+        
+        return response
+        
+    except Exception as e:
+        logging.error(f"Error downloading XML content: {e}")
+        return jsonify({"error": "Internal server error"}), 500
+
+@app.route('/api/database/xml-search', methods=['POST'])
+def search_xml_configurations():
+    """API endpoint to search XML configurations"""
+    try:
+        data = request.get_json()
+        db_config = data.get('database_config')
+        search_term = data.get('search_term', '').strip()
+        use_demo = data.get('use_demo', False)
+        
+        if not search_term:
+            return jsonify({"error": "No search term provided"}), 400
+        
+        if use_demo:
+            # Demo search functionality
+            demo_names = database_service.get_demo_xml_names()
+            results = [
+                {"name": name, "preview": f"Demo configuration: {name}"}
+                for name in demo_names
+                if search_term.lower() in name.lower()
+            ]
+            return jsonify({
+                "success": True,
+                "results": results,
+                "demo_mode": True
+            })
+        
+        if not db_config:
+            return jsonify({"error": "No database configuration provided"}), 400
+        
+        success, results, error_msg = database_service.search_xml_configurations(db_config, search_term)
+        
+        return jsonify({
+            "success": success,
+            "results": results,
+            "error": error_msg,
+            "demo_mode": False
+        })
+        
+    except Exception as e:
+        logging.error(f"Error searching XML configurations: {e}")
+        return jsonify({"error": "Internal server error"}), 500
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5000)
