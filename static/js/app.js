@@ -119,6 +119,31 @@ angular.module('productApp', [])
             alert('Configuration search feature will be implemented to search through XML files in the database.');
         };
         
+        // Copy to clipboard functionality
+        $scope.copyToClipboard = function(text) {
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(text).then(function() {
+                    // Could show a toast notification here
+                    console.log('Copied to clipboard:', text);
+                }).catch(function(err) {
+                    console.error('Failed to copy: ', err);
+                });
+            } else {
+                // Fallback for older browsers
+                const textArea = document.createElement('textarea');
+                textArea.value = text;
+                document.body.appendChild(textArea);
+                textArea.select();
+                try {
+                    document.execCommand('copy');
+                    console.log('Copied to clipboard:', text);
+                } catch (err) {
+                    console.error('Failed to copy: ', err);
+                }
+                document.body.removeChild(textArea);
+            }
+        };
+        
         // Initialize the application
         $scope.init();
         
