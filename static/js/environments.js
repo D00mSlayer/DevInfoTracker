@@ -125,24 +125,27 @@ angular.module('appLensApp')
         // Load XML configurations
         $scope.loadXmlConfigurations = function(refresh, useDemo) {
             console.log('Loading XML configurations, useDemo:', useDemo);
-            $scope.xmlConfigStatus.loading = true;
             
             if (useDemo) {
                 // Demo mode - load sample configurations immediately
-                console.log('Loading demo XML configurations');
+                console.log('Activating demo mode with sample XML configurations');
                 $scope.xmlConfigStatus.loading = false;
                 $scope.xmlConfigStatus.xmlNames = ['app-config.xml', 'database-settings.xml', 'email-templates.xml', 'logging-config.xml', 'security-policies.xml', 'service-endpoints.xml', 'user-permissions.xml', 'validation-rules.xml'];
                 $scope.xmlConfigStatus.demoMode = true;
+                // Show demo message to user
+                console.log('Demo mode activated - 8 sample XML configurations loaded');
                 return;
             }
             
+            $scope.xmlConfigStatus.loading = true;
+            
             var environment = SharedDataService.getSelectedEnvironment();
             var payload = {
-                use_demo: useDemo || false
+                use_demo: false
             };
             
             // Find primary database from the databases array
-            if (!useDemo && environment && environment.databases) {
+            if (environment && environment.databases) {
                 var primaryDb = environment.databases.find(db => db.type === 'primary');
                 if (primaryDb) {
                     payload.database_config = primaryDb;
@@ -184,13 +187,23 @@ angular.module('appLensApp')
                 error: null
             };
             
+            // If in demo mode, show demo content immediately
+            if ($scope.xmlConfigStatus.demoMode) {
+                console.log('Showing demo XML content for:', xmlName);
+                $scope.xmlContent.loading = false;
+                $scope.xmlContent.content = getDemoXmlContent(xmlName);
+                var modal = new bootstrap.Modal(document.getElementById('xmlContentModal'));
+                modal.show();
+                return;
+            }
+            
             var environment = SharedDataService.getSelectedEnvironment();
             var payload = {
                 xml_name: xmlName,
-                use_demo: $scope.xmlConfigStatus.demoMode
+                use_demo: false
             };
             
-            if (!$scope.xmlConfigStatus.demoMode && environment && environment.databases) {
+            if (environment && environment.databases) {
                 var primaryDb = environment.databases.find(db => db.type === 'primary');
                 if (primaryDb) {
                     payload.database_config = primaryDb;
@@ -214,17 +227,49 @@ angular.module('appLensApp')
                 });
         };
         
+        // Get demo XML content
+        function getDemoXmlContent(xmlName) {
+            var demoContents = {
+                'app-config.xml': '<?xml version="1.0" encoding="UTF-8"?>\n<configuration>\n    <appSettings>\n        <add key="Environment" value="Development" />\n        <add key="LogLevel" value="Info" />\n        <add key="MaxConnections" value="100" />\n    </appSettings>\n</configuration>',
+                'database-settings.xml': '<?xml version="1.0" encoding="UTF-8"?>\n<databaseConfig>\n    <connectionString>Server=demo-server;Database=demo-db;Trusted_Connection=true;</connectionString>\n    <timeout>30</timeout>\n    <poolSize>50</poolSize>\n</databaseConfig>',
+                'email-templates.xml': '<?xml version="1.0" encoding="UTF-8"?>\n<emailTemplates>\n    <template id="welcome">\n        <subject>Welcome to AppLens!</subject>\n        <body>Thank you for joining our platform.</body>\n    </template>\n</emailTemplates>',
+                'logging-config.xml': '<?xml version="1.0" encoding="UTF-8"?>\n<logging>\n    <level>DEBUG</level>\n    <appenders>\n        <file>logs/app.log</file>\n        <console>true</console>\n    </appenders>\n</logging>',
+                'security-policies.xml': '<?xml version="1.0" encoding="UTF-8"?>\n<securityPolicies>\n    <authentication>\n        <method>JWT</method>\n        <expiration>3600</expiration>\n    </authentication>\n</securityPolicies>',
+                'service-endpoints.xml': '<?xml version="1.0" encoding="UTF-8"?>\n<serviceEndpoints>\n    <endpoint name="UserService" url="https://api.example.com/users" />\n    <endpoint name="OrderService" url="https://api.example.com/orders" />\n</serviceEndpoints>',
+                'user-permissions.xml': '<?xml version="1.0" encoding="UTF-8"?>\n<userPermissions>\n    <role name="Admin">\n        <permission>CREATE</permission>\n        <permission>READ</permission>\n        <permission>UPDATE</permission>\n        <permission>DELETE</permission>\n    </role>\n</userPermissions>',
+                'validation-rules.xml': '<?xml version="1.0" encoding="UTF-8"?>\n<validationRules>\n    <rule field="email" pattern="^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}$" />\n    <rule field="phone" pattern="^\\+?[1-9]\\d{1,14}$" />\n</validationRules>'
+            };
+            
+            return demoContents[xmlName] || '<?xml version="1.0" encoding="UTF-8"?>\n<demo>\n    <message>Demo XML content for ' + xmlName + '</message>\n    <note>This is sample content for demonstration purposes.</note>\n</demo>';
+        }
+        
         // Download XML content
         $scope.downloadXmlContent = function(xmlName) {
             if (!xmlName) return;
             
+            // If in demo mode, download demo content directly
+            if ($scope.xmlConfigStatus.demoMode) {
+                console.log('Downloading demo XML content for:', xmlName);
+                var content = getDemoXmlContent(xmlName);
+                var blob = new Blob([content], { type: 'application/xml' });
+                var url = window.URL.createObjectURL(blob);
+                var a = document.createElement('a');
+                a.href = url;
+                a.download = xmlName;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                document.body.removeChild(a);
+                return;
+            }
+            
             var environment = SharedDataService.getSelectedEnvironment();
             var payload = {
                 xml_name: xmlName,
-                use_demo: $scope.xmlConfigStatus.demoMode
+                use_demo: false
             };
             
-            if (!$scope.xmlConfigStatus.demoMode && environment && environment.databases) {
+            if (environment && environment.databases) {
                 var primaryDb = environment.databases.find(db => db.type === 'primary');
                 if (primaryDb) {
                     payload.database_config = primaryDb;
