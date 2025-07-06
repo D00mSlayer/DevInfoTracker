@@ -10,9 +10,11 @@ angular.module('appLensApp')
         // Sample data for demonstration
         $scope.sampleAnalysisData = {
             summary: {
-                totalTickets: 7,
-                totalGitLinks: 14,
+                totalTickets: 8,
+                totalGitLinks: 12, // Unique count (some duplicates removed)
                 maxDepth: 3,
+                hasCyclicReferences: true,
+                cyclicReferences: ['PROJ-1242'],
                 ticketTypeBreakdown: {
                     'Epic': 1,
                     'User Story': 2,
@@ -67,6 +69,11 @@ angular.module('appLensApp')
                                 },
                                 {
                                     url: 'https://github.com/company/frontend/pull/789',
+                                    type: 'Pull Request',
+                                    commentedBy: 'Jane Doe'
+                                },
+                                {
+                                    url: 'https://github.com/company/auth-service/pull/456',
                                     type: 'Pull Request',
                                     commentedBy: 'Jane Doe'
                                 }
@@ -163,6 +170,18 @@ angular.module('appLensApp')
                                         }
                                     ],
                                     children: []
+                                },
+                                {
+                                    key: 'PROJ-1242',
+                                    type: 'Task',
+                                    summary: 'Link back to main epic (cyclic reference example)',
+                                    status: 'To Do',
+                                    assignee: 'System Admin',
+                                    url: 'https://company.atlassian.net/browse/PROJ-1242',
+                                    gitLinks: [],
+                                    children: [],
+                                    cyclicReference: true,
+                                    error: 'Cyclic reference detected - this ticket was already processed at a higher level'
                                 }
                             ]
                         }

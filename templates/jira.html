@@ -54,6 +54,16 @@
                 </h5>
             </div>
             <div class="card-body">
+                <!-- Cyclic Reference Warning -->
+                <div ng-if="analysisResults.summary.hasCyclicReferences" class="alert alert-warning mb-3">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    <strong>Cyclic References Detected:</strong> 
+                    The following tickets create circular dependencies: 
+                    <span ng-repeat="ticket in analysisResults.summary.cyclicReferences">
+                        <strong>{{ticket}}</strong><span ng-if="!$last">, </span>
+                    </span>
+                </div>
+                
                 <div class="row text-center">
                     <div class="col-md-3">
                         <div class="stat-box">
@@ -63,7 +73,7 @@
                     </div>
                     <div class="col-md-3">
                         <div class="stat-box">
-                            <small class="text-muted d-block">Git Links Found</small>
+                            <small class="text-muted d-block">Unique Git Links</small>
                             <strong class="text-success fs-4">{{analysisResults.summary.totalGitLinks}}</strong>
                         </div>
                     </div>
@@ -151,6 +161,18 @@
                             <strong>Status:</strong> {{ticketData.status}} | 
                             <strong>Assignee:</strong> {{ticketData.assignee || 'Unassigned'}}
                         </small>
+                        
+                        <!-- Cyclic Reference Warning -->
+                        <div ng-if="ticketData.cyclicReference" class="alert alert-warning mt-2 mb-0 p-2">
+                            <i class="fas fa-exclamation-triangle me-1"></i>
+                            <small><strong>Cyclic Reference:</strong> {{ticketData.error}}</small>
+                        </div>
+                        
+                        <!-- Fetch Error Warning -->
+                        <div ng-if="ticketData.fetchError" class="alert alert-danger mt-2 mb-0 p-2">
+                            <i class="fas fa-exclamation-circle me-1"></i>
+                            <small><strong>Fetch Error:</strong> {{ticketData.fetchError}}</small>
+                        </div>
                     </div>
                     <div class="col-md-6">
                         <div ng-if="ticketData.gitLinks.length > 0">

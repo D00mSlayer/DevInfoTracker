@@ -123,20 +123,42 @@ class JiraGitLabService:
             logger.error(f"Error analyzing ticket {ticket_id}: {e}")
             return {"error": f"Failed to analyze ticket: {str(e)}"}
     
-    def _build_ticket_hierarchy(self, ticket, depth=0, max_depth=10) -> Dict[str, Any]:
+    def _build_ticket_hierarchy(self, ticket, depth=0, max_depth=10, visited_keys=None) -> Dict[str, Any]:
         """
-        Recursively build ticket hierarchy
+        Recursively build ticket hierarchy with cycle detection
         
         Args:
             ticket: Jira ticket object
             depth: Current depth in hierarchy
             max_depth: Maximum depth to traverse
+            visited_keys: Set of ticket keys already visited (for cycle detection)
             
         Returns:
             Dictionary representing ticket and its children
         """
+        if visited_keys is None:
+            visited_keys = set()
+        
         if depth > max_depth:
             return None
+        
+        # Cycle detection
+        if ticket.key in visited_keys:
+            return {
+                "key": ticket.key,
+                "type": ticket.fields.issuetype.name,
+                "summary": ticket.fields.summary,
+                "status": ticket.fields.status.name,
+                "assignee": ticket.fields.assignee.displayName if ticket.fields.assignee else None,
+                "url": f"{self.jira_url}/browse/{ticket.key}",
+                "gitLinks": [],
+                "children": [],
+                "cyclicReference": True,
+                "error": f"Cyclic reference detected - this ticket was already processed at a higher level"
+            }
+        
+        # Add current ticket to visited set
+        visited_keys.add(ticket.key)
         
         # Get ticket details
         ticket_data = {
@@ -147,22 +169,37 @@ class JiraGitLabService:
             "assignee": ticket.fields.assignee.displayName if ticket.fields.assignee else None,
             "url": f"{self.jira_url}/browse/{ticket.key}",
             "gitLinks": [],
-            "children": []
+            "children": [],
+            "cyclicReference": False
         }
         
-        # Get child tickets
+        # Get child tickets and linked tickets
         try:
-            # Search for tickets that link to this one
-            jql = f'parent = {ticket.key} OR "Epic Link" = {ticket.key}'
-            child_issues = self.jira_client.search_issues(jql, maxResults=100)
+            # Search for both child tickets and linked tickets
+            # Child tickets: parent relationship or epic link
+            child_jql = f'parent = {ticket.key} OR "Epic Link" = {ticket.key}'
             
-            for child_issue in child_issues:
-                child_data = self._build_ticket_hierarchy(child_issue, depth + 1, max_depth)
+            # Linked tickets: issue links (blocks, relates to, etc.)
+            linked_jql = f'issue in linkedIssues({ticket.key})'
+            
+            # Combine both searches
+            combined_jql = f'({child_jql}) OR ({linked_jql})'
+            
+            related_issues = self.jira_client.search_issues(combined_jql, maxResults=200)
+            
+            for related_issue in related_issues:
+                # Create a copy of visited_keys for this branch
+                branch_visited = visited_keys.copy()
+                child_data = self._build_ticket_hierarchy(related_issue, depth + 1, max_depth, branch_visited)
                 if child_data:
                     ticket_data["children"].append(child_data)
                     
         except Exception as e:
-            logger.warning(f"Error fetching children for {ticket.key}: {e}")
+            logger.warning(f"Error fetching related tickets for {ticket.key}: {e}")
+            ticket_data["fetchError"] = f"Failed to fetch related tickets: {str(e)}"
+        
+        # Remove current ticket from visited set (backtrack)
+        visited_keys.remove(ticket.key)
         
         return ticket_data
     
@@ -307,16 +344,24 @@ class JiraGitLabService:
             Summary statistics
         """
         total_tickets = 0
-        total_git_links = 0
+        unique_git_links = set()
         max_depth = 0
         ticket_types = {}
+        cyclic_tickets = []
         
         def traverse(ticket_data, depth=0):
-            nonlocal total_tickets, total_git_links, max_depth, ticket_types
+            nonlocal total_tickets, unique_git_links, max_depth, ticket_types, cyclic_tickets
             
             total_tickets += 1
-            total_git_links += len(ticket_data.get("gitLinks", []))
             max_depth = max(max_depth, depth)
+            
+            # Track cyclic references
+            if ticket_data.get("cyclicReference", False):
+                cyclic_tickets.append(ticket_data.get("key", "Unknown"))
+            
+            # Count unique git links
+            for git_link in ticket_data.get("gitLinks", []):
+                unique_git_links.add(git_link.get("url", ""))
             
             ticket_type = ticket_data.get("type", "Unknown")
             ticket_types[ticket_type] = ticket_types.get(ticket_type, 0) + 1
@@ -326,12 +371,21 @@ class JiraGitLabService:
         
         traverse(ticket_hierarchy)
         
-        return {
+        summary = {
             "totalTickets": total_tickets,
-            "totalGitLinks": total_git_links,
+            "totalGitLinks": len(unique_git_links),
             "maxDepth": max_depth,
             "ticketTypeBreakdown": ticket_types
         }
+        
+        # Add cyclic reference info if any found
+        if cyclic_tickets:
+            summary["cyclicReferences"] = cyclic_tickets
+            summary["hasCyclicReferences"] = True
+        else:
+            summary["hasCyclicReferences"] = False
+        
+        return summary
     
     def check_configuration(self) -> Dict[str, bool]:
         """
