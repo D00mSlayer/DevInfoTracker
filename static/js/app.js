@@ -52,6 +52,9 @@ angular.module('appLensApp', [])
             $scope.currentView = viewName;
         };
         
+        // Shared data for modal
+        $scope.selectedEnvironment = null;
+        
         // Environment functionality
         $scope.selectBase = function(base, index) {
             $scope.selectedBase = base;

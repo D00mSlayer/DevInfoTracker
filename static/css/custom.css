@@ -486,15 +486,21 @@ body {
 .sidebar-toggle {
     background: none;
     border: none;
-    color: var(--pure-white);
+    color: #ffffff;
     font-size: 1.25rem;
     margin-left: auto;
     padding: 0.25rem;
     border-radius: 4px;
     transition: all 0.3s ease;
+    cursor: pointer;
 }
 
 .sidebar-toggle:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.sidebar-toggle:focus {
+    outline: none;
     background: rgba(255, 255, 255, 0.2);
 }
 

@@ -41,7 +41,9 @@ angular.module('appLensApp')
         
         // View environment details in modal
         $scope.viewEnvironmentDetails = function(environment) {
+            // Set on both local scope and parent scope
             $scope.selectedEnvironment = environment;
+            $scope.$parent.selectedEnvironment = environment;
             var modal = new bootstrap.Modal(document.getElementById('environmentModal'));
             modal.show();
         };
@@ -51,6 +53,9 @@ angular.module('appLensApp')
             console.log('Searching configurations for:', environment, 'term:', searchTerm);
             alert('Configuration search feature will search through XML files in the database for: ' + searchTerm);
         };
+        
+        // Also set configuration search on parent scope for modal
+        $scope.$parent.searchConfigurations = $scope.searchConfigurations;
         
         // Copy to clipboard functionality
         $scope.copyToClipboard = function(text) {
@@ -75,6 +80,9 @@ angular.module('appLensApp')
                 document.body.removeChild(textArea);
             }
         };
+        
+        // Make functions available to parent scope for modal
+        $scope.$parent.copyToClipboard = $scope.copyToClipboard;
         
         // Initialize
         $scope.loadEnvironmentData();
