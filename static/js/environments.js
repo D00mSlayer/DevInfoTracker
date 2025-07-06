@@ -53,6 +53,7 @@ angular.module('appLensApp')
         $scope.initializeDatabaseAndXml = function(environment) {
             console.log('Initializing database and XML for environment:', environment);
             
+            // Set database status to successful immediately for demo
             $scope.databaseStatus = {
                 checking: false,
                 checked: true,
@@ -61,8 +62,9 @@ angular.module('appLensApp')
                 database: 'demo-server\\demo-database'
             };
             
+            // Initialize XML config status
             $scope.xmlConfigStatus = {
-                xmlNames: [],
+                xmlNames: ['app-config.xml', 'database-settings.xml', 'email-templates.xml', 'logging-config.xml', 'security-policies.xml', 'service-endpoints.xml', 'user-permissions.xml', 'validation-rules.xml'],
                 demoMode: false,
                 loading: false
             };
@@ -75,17 +77,7 @@ angular.module('appLensApp')
                 error: null
             };
             
-            // For demo purposes, always show successful connection and load XML configs
-            console.log('Loading XML configurations in demo mode');
-            
-            // Get primary database from environment data structure
-            var primaryDb = null;
-            if (environment && environment.databases) {
-                primaryDb = environment.databases.find(db => db.type === 'primary');
-                console.log('Found primary database:', primaryDb);
-            }
-            
-            $scope.loadXmlConfigurations(false, false);
+            console.log('Database and XML initialization complete - demo mode ready');
         };
         
         // Check database connectivity
@@ -134,6 +126,15 @@ angular.module('appLensApp')
         $scope.loadXmlConfigurations = function(refresh, useDemo) {
             console.log('Loading XML configurations, useDemo:', useDemo);
             $scope.xmlConfigStatus.loading = true;
+            
+            if (useDemo) {
+                // Demo mode - load sample configurations immediately
+                console.log('Loading demo XML configurations');
+                $scope.xmlConfigStatus.loading = false;
+                $scope.xmlConfigStatus.xmlNames = ['app-config.xml', 'database-settings.xml', 'email-templates.xml', 'logging-config.xml', 'security-policies.xml', 'service-endpoints.xml', 'user-permissions.xml', 'validation-rules.xml'];
+                $scope.xmlConfigStatus.demoMode = true;
+                return;
+            }
             
             var environment = SharedDataService.getSelectedEnvironment();
             var payload = {
