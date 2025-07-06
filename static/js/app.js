@@ -1,6 +1,18 @@
 // AppLens - AngularJS Single Page Application
 angular.module('appLensApp', [])
-    .controller('MainController', ['$scope', '$http', function($scope, $http) {
+    .service('SharedDataService', function() {
+        var service = {
+            selectedEnvironment: null,
+            setSelectedEnvironment: function(environment) {
+                service.selectedEnvironment = environment;
+            },
+            getSelectedEnvironment: function() {
+                return service.selectedEnvironment;
+            }
+        };
+        return service;
+    })
+    .controller('MainController', ['$scope', '$http', 'SharedDataService', function($scope, $http, SharedDataService) {
         
         // Initialize scope variables
         $scope.currentView = 'environments';
@@ -52,8 +64,13 @@ angular.module('appLensApp', [])
             $scope.currentView = viewName;
         };
         
-        // Shared data for modal
-        $scope.selectedEnvironment = null;
+        // Use shared service for modal data
+        $scope.selectedEnvironment = SharedDataService.selectedEnvironment;
+        $scope.$watch(function() {
+            return SharedDataService.selectedEnvironment;
+        }, function(newValue) {
+            $scope.selectedEnvironment = newValue;
+        });
         
         // Environment functionality
         $scope.selectBase = function(base, index) {

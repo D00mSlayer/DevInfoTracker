@@ -2,55 +2,46 @@
 
 [% block content %]
 <!-- AppLens SPA Container -->
-<div class="app-container">
-    <!-- Sidebar Navigation -->
-    <nav class="sidebar" ng-class="{'collapsed': sidebarCollapsed}">
-        <div class="sidebar-header">
-            <div class="d-flex align-items-center justify-content-between">
-                <a href="javascript:void(0)" class="sidebar-brand">
-                    <i class="fas fa-eye"></i>
-                    <span class="sidebar-brand-text">AppLens</span>
-                </a>
-                <button class="sidebar-toggle" ng-click="toggleSidebar()">
-                    <i class="fas fa-bars"></i>
-                </button>
-            </div>
-        </div>
-        
-        <div class="sidebar-nav">
-            <div class="sidebar-nav-item">
-                <a href="javascript:void(0)" class="sidebar-nav-link" ng-click="setCurrentView('environments')" ng-class="{'active': currentView === 'environments'}">
-                    <i class="fas fa-server"></i>
-                    <span class="sidebar-nav-text">Environments</span>
-                </a>
-            </div>
-            <div class="sidebar-nav-item">
-                <a href="javascript:void(0)" class="sidebar-nav-link" ng-click="setCurrentView('jenkins')" ng-class="{'active': currentView === 'jenkins'}">
-                    <i class="fas fa-bookmark"></i>
-                    <span class="sidebar-nav-text">Jenkins Bookmarks</span>
-                </a>
+<div>
+    <!-- Top Navigation Bar -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-light border-bottom">
+        <div class="container">
+            <a class="navbar-brand" href="javascript:void(0)">
+                <i class="fas fa-eye me-2"></i>
+                AppLens
+            </a>
+            <div class="navbar-nav ms-auto">
+                <ul class="nav nav-pills">
+                    <li class="nav-item">
+                        <a class="nav-link" href="javascript:void(0)" ng-click="setCurrentView('environments')" ng-class="{'active': currentView === 'environments'}">
+                            <i class="fas fa-server me-1"></i>
+                            Environments
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="javascript:void(0)" ng-click="setCurrentView('jenkins')" ng-class="{'active': currentView === 'jenkins'}">
+                            <i class="fas fa-bookmark me-1"></i>
+                            Jenkins Bookmarks
+                        </a>
+                    </li>
+                </ul>
             </div>
         </div>
     </nav>
 
-    <!-- Main Content Area -->
-    <div class="main-content" ng-class="{'expanded': sidebarCollapsed}">
-        <div class="content-area">
-            <!-- Loading State -->
-            <div ng-if="loading" class="text-center py-5">
-                <div class="spinner-border text-primary" role="status">
-                    <span class="visually-hidden">Loading...</span>
-                </div>
-                <p class="mt-2">Loading data...</p>
-            </div>
-
-            <!-- Environments View -->
-            <div ng-if="currentView === 'environments' && !loading" ng-controller="EnvironmentsController" ng-include="'/templates/environments'"></div>
-            
-            <!-- Jenkins Bookmarks View -->
-            <div ng-if="currentView === 'jenkins' && !loading" ng-controller="JenkinsController" ng-include="'/templates/jenkins'"></div>
+    <!-- Loading State -->
+    <div ng-if="loading" class="text-center py-5">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
         </div>
+        <p class="mt-2">Loading data...</p>
     </div>
+
+    <!-- Environments View -->
+    <div ng-if="currentView === 'environments' && !loading" ng-controller="EnvironmentsController" ng-include="'/templates/environments'"></div>
+    
+    <!-- Jenkins Bookmarks View -->
+    <div ng-if="currentView === 'jenkins' && !loading" ng-controller="JenkinsController" ng-include="'/templates/jenkins'"></div>
 </div>
 
 <!-- Environment Details Modal (Shared) -->
