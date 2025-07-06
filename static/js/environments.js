@@ -62,7 +62,7 @@ angular.module('appLensApp')
                 database: 'demo-server\\demo-database'
             };
             
-            // Initialize XML config status
+            // Initialize XML config status with pre-loaded demo data
             $scope.xmlConfigStatus = {
                 xmlNames: ['app-config.xml', 'database-settings.xml', 'email-templates.xml', 'logging-config.xml', 'security-policies.xml', 'service-endpoints.xml', 'user-permissions.xml', 'validation-rules.xml'],
                 demoMode: false,
@@ -77,7 +77,7 @@ angular.module('appLensApp')
                 error: null
             };
             
-            console.log('Database and XML initialization complete - demo mode ready');
+            console.log('DEMO: Database and XML initialization complete - 8 XML files ready');
         };
         
         // Check database connectivity
@@ -124,16 +124,18 @@ angular.module('appLensApp')
         
         // Load XML configurations
         $scope.loadXmlConfigurations = function(refresh, useDemo) {
-            console.log('Loading XML configurations, useDemo:', useDemo);
+            console.log('loadXmlConfigurations called with refresh:', refresh, 'useDemo:', useDemo);
             
             if (useDemo) {
                 // Demo mode - load sample configurations immediately
-                console.log('Activating demo mode with sample XML configurations');
+                console.log('DEMO MODE: Activating demo mode with sample XML configurations');
                 $scope.xmlConfigStatus.loading = false;
                 $scope.xmlConfigStatus.xmlNames = ['app-config.xml', 'database-settings.xml', 'email-templates.xml', 'logging-config.xml', 'security-policies.xml', 'service-endpoints.xml', 'user-permissions.xml', 'validation-rules.xml'];
                 $scope.xmlConfigStatus.demoMode = true;
-                // Show demo message to user
-                console.log('Demo mode activated - 8 sample XML configurations loaded');
+                // Force scope update
+                $scope.$apply();
+                console.log('DEMO MODE: Demo mode activated - 8 sample XML configurations loaded');
+                console.log('DEMO MODE: xmlConfigStatus:', $scope.xmlConfigStatus);
                 return;
             }
             
