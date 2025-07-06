@@ -401,17 +401,13 @@
                                     </h6>
                                 </div>
                                 <div class="card-body">
-                                    <div class="row">
-                                        <div class="col-md-8">
-                                            <input type="text" class="form-control" placeholder="Search XML configurations..." 
-                                                   ng-model="configSearchTerm">
-                                        </div>
-                                        <div class="col-md-4">
-                                            <button class="btn btn-primary w-100" ng-click="searchConfigurations(selectedEnvironment, configSearchTerm)">
-                                                <i class="fas fa-search me-1"></i>
-                                                Search Configurations
-                                            </button>
-                                        </div>
+                                    <div class="input-group">
+                                        <input type="text" class="form-control" placeholder="Search XML configurations..." 
+                                               ng-model="configSearchTerm">
+                                        <button class="btn btn-primary" ng-click="searchConfigurations(selectedEnvironment, configSearchTerm)">
+                                            <i class="fas fa-search me-1"></i>
+                                            Search Configurations
+                                        </button>
                                     </div>
                                     <small class="text-muted mt-2 d-block">
                                         <i class="fas fa-info-circle me-1"></i>
