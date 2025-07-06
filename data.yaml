@@ -13,16 +13,20 @@ products:
                 git_build_url: "https://github.com/company/ecommerce/tree/develop"
                 git_type: "branch"
                 databases:
-                  - name: "primary"
-                    server: "dev-db-primary.company.com"
+                  - name: "Primary Database"
+                    type: "primary"
+                    host: "COMPANYDEV01\\SQLSERVER"
                     port: 1433
                     database: "ecommerce_dev"
-                    status: "online"
-                  - name: "secondary"
-                    server: "dev-db-secondary.company.com"
+                    username: "dev_user"
+                    password: "DevPass123!"
+                  - name: "Secondary Database"
+                    type: "secondary"
+                    host: "183.28.27.102\\SQLSERVER"
                     port: 1433
                     database: "ecommerce_dev_replica"
-                    status: "online"
+                    username: "readonly_user"
+                    password: "ReadOnlyPass456!"
                 microservices:
                   - name: "user-service"
                     server_url: "https://user-service-dev.company.com"
@@ -47,11 +51,13 @@ products:
                 git_build_url: "https://github.com/company/ecommerce/tree/qa"
                 git_type: "branch"
                 databases:
-                  - name: "primary"
-                    server: "qa-db-primary.company.com"
+                  - name: "Primary Database"
+                    type: "primary"
+                    host: "COMPANYQA01\\SQLSERVER"
                     port: 1433
                     database: "ecommerce_qa"
-                    status: "online"
+                    username: "qa_user"
+                    password: "QAPass789!"
                 microservices:
                   - name: "user-service"
                     server_url: "https://user-service-qa.company.com"
@@ -70,16 +76,20 @@ products:
                 git_build_url: "https://github.com/company/ecommerce/releases/tag/v1.2.3"
                 git_type: "tag"
                 databases:
-                  - name: "primary"
-                    server: "prod-db-primary.company.com"
+                  - name: "Primary Database"
+                    type: "primary"
+                    host: "COMPANYPROD01\\SQLSERVER"
                     port: 1433
                     database: "ecommerce_prod"
-                    status: "online"
-                  - name: "secondary"
-                    server: "prod-db-secondary.company.com"
+                    username: "prod_user"
+                    password: "ProdSecure987!"
+                  - name: "Secondary Database"
+                    type: "secondary"
+                    host: "183.28.27.580\\SQLSERVER"
                     port: 1433
                     database: "ecommerce_prod_replica"
-                    status: "online"
+                    username: "readonly_user"
+                    password: "ReadOnlySecure321!"
                 microservices:
                   - name: "user-service"
                     server_url: "https://user-service.company.com"
@@ -101,11 +111,13 @@ products:
                 git_build_url: "https://github.com/company/ecommerce/tree/v2-develop"
                 git_type: "branch"
                 databases:
-                  - name: "primary"
-                    server: "v2-dev-db-primary.company.com"
+                  - name: "Primary Database"
+                    type: "primary"
+                    host: "COMPANYV2DEV01\\SQLSERVER"
                     port: 1433
                     database: "ecommerce_v2_dev"
-                    status: "online"
+                    username: "v2_dev_user"
+                    password: "V2DevPass123!"
                 microservices:
                   - name: "user-service"
                     server_url: "https://v2-user-service-dev.company.com"
@@ -136,11 +148,13 @@ products:
                 git_build_url: "https://github.com/company/ecommerce-clienta/tree/uat"
                 git_type: "branch"
                 databases:
-                  - name: "primary"
-                    server: "clienta-uat-db.company.com"
+                  - name: "Primary Database"
+                    type: "primary"
+                    host: "CLIENTAUAT01\\SQLSERVER"
                     port: 1433
                     database: "ecommerce_clienta_uat"
-                    status: "online"
+                    username: "clienta_uat_user"
+                    password: "ClientAUAT456!"
                 microservices:
                   - name: "user-service"
                     server_url: "https://clienta-user-service-uat.company.com"
@@ -153,11 +167,13 @@ products:
                 git_build_url: "https://github.com/company/ecommerce-clienta/releases/tag/v1.0.5"
                 git_type: "tag"
                 databases:
-                  - name: "primary"
-                    server: "clienta-prod-db.company.com"
+                  - name: "Primary Database"
+                    type: "primary"
+                    host: "CLIENTAPROD01\\SQLSERVER"
                     port: 1433
                     database: "ecommerce_clienta_prod"
-                    status: "online"
+                    username: "clienta_prod_user"
+                    password: "ClientAProd789!"
                 microservices:
                   - name: "user-service"
                     server_url: "https://clienta-user-service.company.com"

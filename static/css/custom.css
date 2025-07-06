@@ -368,6 +368,19 @@ a:hover {
     padding-right: 1rem;
 }
 
+/* Fix horizontal scrollbar issues */
+body {
+    overflow-x: hidden;
+}
+
+.container {
+    overflow-x: hidden;
+}
+
+.card-body {
+    overflow-x: hidden;
+}
+
 /* Environment stat boxes */
 .stat-box {
     background: linear-gradient(135deg, var(--light-gray) 0%, var(--pure-white) 100%);
