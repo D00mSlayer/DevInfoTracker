@@ -279,6 +279,66 @@ class DatabaseService:
             logger.error(error_msg)
             return False, [], error_msg
 
+    def execute_sql_query(self, db_config: Dict, sql_query: str) -> Tuple[bool, List[Dict], List[str], int, str]:
+        """
+        Execute SQL query against the database
+        
+        Args:
+            db_config: Database configuration dictionary
+            sql_query: SQL query string to execute
+            
+        Returns:
+            Tuple of (success: bool, data: List[Dict], columns: List[str], row_count: int, error_message: str)
+        """
+        try:
+            # Build connection string
+            conn_str = self._build_connection_string(db_config)
+            
+            # Connect to database
+            conn = pyodbc.connect(conn_str, timeout=30)
+            cursor = conn.cursor()
+            
+            # Execute query
+            cursor.execute(sql_query)
+            
+            # Check if query returns results
+            if cursor.description:
+                # Query returns results (SELECT)
+                columns = [col[0] for col in cursor.description]
+                rows = cursor.fetchall()
+                
+                # Convert rows to list of dictionaries
+                data = []
+                for row in rows:
+                    row_dict = {}
+                    for i, col in enumerate(columns):
+                        value = row[i]
+                        # Handle different data types
+                        if value is None:
+                            row_dict[col] = None
+                        elif isinstance(value, (bytes, bytearray)):
+                            row_dict[col] = value.decode('utf-8', errors='ignore')
+                        else:
+                            row_dict[col] = str(value)
+                    data.append(row_dict)
+                
+                row_count = len(data)
+                conn.close()
+                return True, data, columns, row_count, ""
+            else:
+                # Query doesn't return results (INSERT, UPDATE, DELETE, etc.)
+                row_count = cursor.rowcount
+                conn.commit()
+                conn.close()
+                return True, [], [], row_count, ""
+                
+        except pyodbc.Error as e:
+            error_msg = f"Database error: {str(e)}"
+            return False, [], [], 0, error_msg
+        except Exception as e:
+            error_msg = f"Unexpected error: {str(e)}"
+            return False, [], [], 0, error_msg
+
     def get_demo_xml_names(self) -> List[str]:
         """
         Get demo XML configuration names for testing

@@ -100,6 +100,11 @@ Production deployment would require:
   - Created database service with demo mode for testing without actual database connections
   - Fixed data structure mismatch between YAML (databases array) and JavaScript expectations
   - Added API endpoints for database testing and XML management with proper error handling
+- Implemented SQL Query Editor with raw SQL execution capability and tabular results display
+- Added database connection selection for primary/secondary databases in SQL editor
+- Created SQL query execution backend with pyodbc driver for MSSQL connectivity
+- Added export functionality for query results in CSV format
+- Implemented standalone SQL editor that opens in new browser tab with full query capabilities
 
 ## User Preferences
 

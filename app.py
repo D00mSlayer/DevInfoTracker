@@ -351,5 +351,50 @@ def search_xml_configurations():
         logging.error(f"Error searching XML configurations: {e}")
         return jsonify({"error": "Internal server error"}), 500
 
+
+@app.route('/api/database/execute-sql', methods=['POST'])
+def execute_sql_query():
+    """API endpoint to execute SQL queries"""
+    try:
+        data = request.json or {}
+        sql_query = data.get('sql_query', '').strip()
+        database_config = data.get('database_config')
+        
+        if not sql_query:
+            return jsonify({
+                'success': False,
+                'error': 'SQL query is required'
+            })
+        
+        if not database_config:
+            return jsonify({
+                'success': False,
+                'error': 'Database configuration is required'
+            })
+        
+        db_service = DatabaseService()
+        success, data_results, columns, row_count, error = db_service.execute_sql_query(database_config, sql_query)
+        
+        if success:
+            return jsonify({
+                'success': True,
+                'data': data_results,
+                'columns': columns,
+                'row_count': row_count
+            })
+        else:
+            return jsonify({
+                'success': False,
+                'error': error
+            })
+    
+    except Exception as e:
+        logging.error(f"Error in execute_sql_query: {str(e)}")
+        return jsonify({
+            'success': False,
+            'error': 'Internal server error'
+        })
+
+
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5000)

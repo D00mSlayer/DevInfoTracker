@@ -357,6 +357,245 @@ angular.module('appLensApp')
                 .replace(/(&gt;)/g, '<span class="xml-tag">$1</span>')
                 .replace(/(\w+)(\s*=\s*)("[^"]*")/g, '<span class="xml-attribute">$1</span>$2<span class="xml-value">$3</span>');
         }
+
+        // SQL Query Editor Functions
+        $scope.selectedDatabase = '';
+        $scope.sqlQuery = '';
+        $scope.sqlQueryStatus = {
+            executing: false
+        };
+        $scope.sqlQueryResults = {
+            data: null,
+            columns: [],
+            rowCount: 0,
+            error: null
+        };
+        
+        // Execute SQL Query
+        $scope.executeSqlQuery = function() {
+            if (!$scope.sqlQuery || !$scope.selectedDatabase) return;
+            
+            $scope.sqlQueryStatus.executing = true;
+            $scope.sqlQueryResults = {
+                data: null,
+                columns: [],
+                rowCount: 0,
+                error: null
+            };
+            
+            var environment = SharedDataService.getSelectedEnvironment();
+            var selectedDb = environment.databases.find(db => db.type === $scope.selectedDatabase);
+            
+            var payload = {
+                database_config: selectedDb,
+                sql_query: $scope.sqlQuery
+            };
+            
+            console.log('Executing SQL query:', $scope.sqlQuery);
+            
+            $http.post('/api/database/execute-sql', payload)
+                .then(function(response) {
+                    $scope.sqlQueryStatus.executing = false;
+                    if (response.data.success) {
+                        $scope.sqlQueryResults.data = response.data.data;
+                        $scope.sqlQueryResults.columns = response.data.columns;
+                        $scope.sqlQueryResults.rowCount = response.data.row_count;
+                        console.log('Query executed successfully:', $scope.sqlQueryResults.rowCount + ' rows');
+                    } else {
+                        $scope.sqlQueryResults.error = response.data.error;
+                        console.error('Query execution error:', response.data.error);
+                    }
+                }).catch(function(error) {
+                    $scope.sqlQueryStatus.executing = false;
+                    $scope.sqlQueryResults.error = 'Failed to execute query: ' + error.data?.error || 'Unknown error';
+                    console.error('Error executing SQL query:', error);
+                });
+        };
+        
+        // Clear SQL Query
+        $scope.clearSqlQuery = function() {
+            $scope.sqlQuery = '';
+            $scope.sqlQueryResults = {
+                data: null,
+                columns: [],
+                rowCount: 0,
+                error: null
+            };
+        };
+        
+        // Open SQL Editor in New Tab
+        $scope.openSqlEditor = function() {
+            if (!$scope.selectedDatabase) return;
+            
+            var environment = SharedDataService.getSelectedEnvironment();
+            var selectedDb = environment.databases.find(db => db.type === $scope.selectedDatabase);
+            
+            var newWindow = window.open('', '_blank');
+            newWindow.document.write(getSqlEditorHtml(selectedDb));
+            newWindow.document.close();
+        };
+        
+        // Export Results to CSV
+        $scope.exportResults = function(format) {
+            if (!$scope.sqlQueryResults.data || $scope.sqlQueryResults.data.length === 0) return;
+            
+            if (format === 'csv') {
+                var csvContent = '';
+                // Add headers
+                csvContent += $scope.sqlQueryResults.columns.join(',') + '\n';
+                // Add data rows
+                $scope.sqlQueryResults.data.forEach(function(row) {
+                    var rowData = $scope.sqlQueryResults.columns.map(function(col) {
+                        var value = row[col] || '';
+                        // Escape commas and quotes in CSV
+                        if (typeof value === 'string' && (value.includes(',') || value.includes('"'))) {
+                            value = '"' + value.replace(/"/g, '""') + '"';
+                        }
+                        return value;
+                    });
+                    csvContent += rowData.join(',') + '\n';
+                });
+                
+                // Download CSV
+                var blob = new Blob([csvContent], { type: 'text/csv' });
+                var url = window.URL.createObjectURL(blob);
+                var a = document.createElement('a');
+                a.href = url;
+                a.download = 'query_results.csv';
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                document.body.removeChild(a);
+            }
+        };
+        
+        // Generate HTML for SQL Editor in new tab
+        function getSqlEditorHtml(dbConfig) {
+            return `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SQL Editor - ${dbConfig.type.toUpperCase()} Database</title>
+    <link href="https://cdn.replit.com/agent/bootstrap-agent-dark-theme.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .sql-editor {
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+        }
+        .results-table {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .query-status {
+            min-height: 30px;
+        }
+    </style>
+</head>
+<body class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="fas fa-database me-2"></i>SQL Editor - ${dbConfig.type.toUpperCase()}</h2>
+        <button class="btn btn-secondary" onclick="window.close()">
+            <i class="fas fa-times me-1"></i>Close
+        </button>
+    </div>
+    
+    <div class="card">
+        <div class="card-header">
+            <h5>Database: ${dbConfig.host}\\${dbConfig.database}</h5>
+        </div>
+        <div class="card-body">
+            <div class="mb-3">
+                <label class="form-label">SQL Query:</label>
+                <textarea class="form-control sql-editor" rows="8" id="sqlQuery" placeholder="Enter your SQL query here..."></textarea>
+            </div>
+            
+            <div class="d-flex gap-2 mb-3">
+                <button class="btn btn-primary" onclick="executeQuery()">
+                    <i class="fas fa-play me-1"></i>Execute Query
+                </button>
+                <button class="btn btn-secondary" onclick="clearQuery()">
+                    <i class="fas fa-eraser me-1"></i>Clear
+                </button>
+            </div>
+            
+            <div class="query-status" id="queryStatus"></div>
+            <div id="queryResults"></div>
+        </div>
+    </div>
+
+    <script>
+        const dbConfig = ${JSON.stringify(dbConfig)};
+        
+        function executeQuery() {
+            const query = document.getElementById('sqlQuery').value;
+            if (!query.trim()) return;
+            
+            const statusDiv = document.getElementById('queryStatus');
+            const resultsDiv = document.getElementById('queryResults');
+            
+            statusDiv.innerHTML = '<div class="spinner-border spinner-border-sm me-2"></div>Executing query...';
+            resultsDiv.innerHTML = '';
+            
+            fetch('/api/database/execute-sql', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    database_config: dbConfig,
+                    sql_query: query
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    statusDiv.innerHTML = \`<div class="alert alert-success"><i class="fas fa-check-circle me-1"></i>Query executed successfully (\${data.row_count} rows)</div>\`;
+                    if (data.data && data.data.length > 0) {
+                        resultsDiv.innerHTML = generateResultsTable(data.data, data.columns);
+                    } else {
+                        resultsDiv.innerHTML = '<div class="text-muted text-center py-3">No results returned</div>';
+                    }
+                } else {
+                    statusDiv.innerHTML = \`<div class="alert alert-danger"><i class="fas fa-exclamation-circle me-1"></i>Error: \${data.error}</div>\`;
+                }
+            })
+            .catch(error => {
+                statusDiv.innerHTML = \`<div class="alert alert-danger"><i class="fas fa-exclamation-circle me-1"></i>Error: \${error.message}</div>\`;
+            });
+        }
+        
+        function clearQuery() {
+            document.getElementById('sqlQuery').value = '';
+            document.getElementById('queryStatus').innerHTML = '';
+            document.getElementById('queryResults').innerHTML = '';
+        }
+        
+        function generateResultsTable(data, columns) {
+            let html = '<div class="results-table"><table class="table table-striped table-hover table-sm">';
+            html += '<thead class="table-dark sticky-top"><tr>';
+            columns.forEach(col => {
+                html += \`<th>\${col}</th>\`;
+            });
+            html += '</tr></thead><tbody>';
+            
+            data.forEach(row => {
+                html += '<tr>';
+                columns.forEach(col => {
+                    html += \`<td>\${row[col] || ''}</td>\`;
+                });
+                html += '</tr>';
+            });
+            
+            html += '</tbody></table></div>';
+            return html;
+        }
+    </script>
+</body>
+</html>`;
+        }
         
         // Get demo XML content
         function getDemoXmlContent(xmlName) {

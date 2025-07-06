@@ -318,6 +318,106 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- SQL Query Editor -->
+                <div class="row mt-3">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header bg-warning text-dark">
+                                <h6 class="mb-0">
+                                    <i class="fas fa-database me-1"></i>
+                                    SQL Query Editor
+                                </h6>
+                            </div>
+                            <div class="card-body">
+                                <!-- Database Selection -->
+                                <div class="mb-3">
+                                    <label class="form-label">Select Database:</label>
+                                    <select class="form-select" ng-model="selectedDatabase" ng-disabled="!databaseStatus.connected">
+                                        <option value="">Choose database connection...</option>
+                                        <option ng-repeat="db in selectedEnvironment.databases" value="{{db.type}}">
+                                            {{db.type | uppercase}} - {{db.host}}\{{db.database}}
+                                        </option>
+                                    </select>
+                                </div>
+                                
+                                <!-- SQL Query Input -->
+                                <div class="mb-3">
+                                    <label class="form-label">SQL Query:</label>
+                                    <textarea class="form-control" rows="6" ng-model="sqlQuery" 
+                                              placeholder="Enter your SQL query here...&#10;Example:&#10;SELECT TOP 10 * FROM Users&#10;SELECT COUNT(*) FROM Orders WHERE CreatedDate >= '2024-01-01'"
+                                              ng-disabled="!selectedDatabase"></textarea>
+                                </div>
+                                
+                                <!-- Action Buttons -->
+                                <div class="d-flex gap-2 mb-3 flex-wrap">
+                                    <button class="btn btn-primary" ng-click="executeSqlQuery()" ng-disabled="!sqlQuery || !selectedDatabase || sqlQueryStatus.executing">
+                                        <i class="fas fa-play me-1" ng-if="!sqlQueryStatus.executing"></i>
+                                        <div class="spinner-border spinner-border-sm me-1" role="status" ng-if="sqlQueryStatus.executing">
+                                            <span class="visually-hidden">Loading...</span>
+                                        </div>
+                                        {{sqlQueryStatus.executing ? 'Executing...' : 'Execute Query'}}
+                                    </button>
+                                    <button class="btn btn-secondary" ng-click="clearSqlQuery()">
+                                        <i class="fas fa-eraser me-1"></i>Clear
+                                    </button>
+                                    <button class="btn btn-outline-info" ng-click="openSqlEditor()" ng-disabled="!selectedDatabase">
+                                        <i class="fas fa-external-link-alt me-1"></i>Open in New Tab
+                                    </button>
+                                </div>
+                                
+                                <!-- Query Results -->
+                                <div ng-if="sqlQueryResults.data || sqlQueryResults.error">
+                                    <hr>
+                                    <h6>Query Results:</h6>
+                                    
+                                    <!-- Error Display -->
+                                    <div ng-if="sqlQueryResults.error" class="alert alert-danger">
+                                        <i class="fas fa-exclamation-circle me-2"></i>
+                                        <strong>Error:</strong> {{sqlQueryResults.error}}
+                                    </div>
+                                    
+                                    <!-- Success Results -->
+                                    <div ng-if="sqlQueryResults.data && !sqlQueryResults.error">
+                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                            <span class="text-muted">
+                                                <i class="fas fa-check-circle text-success me-1"></i>
+                                                Query executed successfully ({{sqlQueryResults.rowCount}} rows)
+                                            </span>
+                                            <div>
+                                                <button class="btn btn-sm btn-outline-primary" ng-click="exportResults('csv')" ng-if="sqlQueryResults.data.length > 0">
+                                                    <i class="fas fa-download me-1"></i>Export CSV
+                                                </button>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Results Table -->
+                                        <div class="table-responsive" style="max-height: 400px; overflow-y: auto;" ng-if="sqlQueryResults.data.length > 0">
+                                            <table class="table table-striped table-hover table-sm">
+                                                <thead class="table-dark sticky-top">
+                                                    <tr>
+                                                        <th ng-repeat="column in sqlQueryResults.columns">{{column}}</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr ng-repeat="row in sqlQueryResults.data">
+                                                        <td ng-repeat="column in sqlQueryResults.columns">{{row[column]}}</td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                        
+                                        <!-- No Results Message -->
+                                        <div ng-if="sqlQueryResults.data.length === 0" class="text-center text-muted py-3">
+                                            <i class="fas fa-info-circle me-1"></i>
+                                            Query executed successfully but returned no rows.
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
