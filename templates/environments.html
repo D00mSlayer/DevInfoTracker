@@ -268,12 +268,9 @@
                                 <!-- XML Selection -->
                                 <div class="mb-3">
                                     <label class="form-label">Available XML Configurations:</label>
-                                    <select class="form-select" ng-model="selectedXmlName" ng-disabled="!databaseStatus.connected && !xmlConfigStatus.demoMode" ng-options="xml for xml in xmlConfigStatus.xmlNames">
+                                    <select class="form-select" ng-model="selectedXmlName" ng-disabled="!databaseStatus.connected" ng-options="xml for xml in xmlConfigStatus.xmlNames">
                                         <option value="">Select an XML configuration...</option>
                                     </select>
-                                    <div ng-if="xmlConfigStatus.demoMode" class="alert alert-info mt-2 p-2">
-                                        <small><i class="fas fa-info-circle me-1"></i>Demo mode - showing sample configurations</small>
-                                    </div>
                                 </div>
                                 
                                 <!-- Actions -->
@@ -284,18 +281,15 @@
                                     <button class="btn btn-success btn-sm" ng-click="downloadXmlContent(selectedXmlName)" ng-disabled="!selectedXmlName">
                                         <i class="fas fa-download me-1"></i>Download
                                     </button>
-                                    <button class="btn btn-outline-secondary btn-sm" ng-click="loadXmlConfigurations(true)">
+                                    <button class="btn btn-outline-secondary btn-sm" ng-click="loadXmlConfigurations()">
                                         <i class="fas fa-sync-alt me-1"></i>Refresh
-                                    </button>
-                                    <button class="btn btn-outline-info btn-sm" ng-click="loadXmlConfigurations(false, true)">
-                                        <i class="fas fa-flask me-1"></i>Demo
                                     </button>
                                 </div>
                                 
                                 <!-- Search -->
                                 <div class="input-group mb-3">
-                                    <input type="text" class="form-control" placeholder="Search XML configurations..." ng-model="configSearchTerm" ng-disabled="!databaseStatus.connected && !xmlConfigStatus.demoMode">
-                                    <button class="btn btn-info" ng-click="searchXmlConfigurations(configSearchTerm)" ng-disabled="!configSearchTerm || (!databaseStatus.connected && !xmlConfigStatus.demoMode)">
+                                    <input type="text" class="form-control" placeholder="Search XML configurations..." ng-model="configSearchTerm" ng-disabled="!databaseStatus.connected">
+                                    <button class="btn btn-info" ng-click="searchXmlConfigurations(configSearchTerm)" ng-disabled="!configSearchTerm || !databaseStatus.connected">
                                         <i class="fas fa-search"></i>
                                     </button>
                                 </div>

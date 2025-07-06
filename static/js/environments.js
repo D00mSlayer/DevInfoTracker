@@ -53,31 +53,31 @@ angular.module('appLensApp')
         $scope.initializeDatabaseAndXml = function(environment) {
             console.log('Initializing database and XML for environment:', environment);
             
-            // Set database status to successful immediately for demo
+            // Initialize database status
             $scope.databaseStatus = {
                 checking: false,
-                checked: true,
-                connected: true,
+                checked: false,
+                connected: false,
                 error: null,
-                database: 'demo-server\\demo-database'
+                database: null
             };
             
-            // Initialize XML config status with pre-loaded demo data
+            // Initialize XML config status
             $scope.xmlConfigStatus = {
-                xmlNames: ['app-config.xml', 'database-settings.xml', 'email-templates.xml', 'logging-config.xml', 'security-policies.xml', 'service-endpoints.xml', 'user-permissions.xml', 'validation-rules.xml'],
-                demoMode: false,
+                xmlNames: [],
                 loading: false
             };
             
             $scope.selectedXmlName = '';
             $scope.searchResults = [];
-            $scope.xmlContent = {
-                content: '',
-                loading: false,
-                error: null
-            };
             
-            console.log('DEMO: Database and XML initialization complete - 8 XML files ready');
+            // Test database connection if databases are configured
+            if (environment.databases && environment.databases.length > 0) {
+                var primaryDb = environment.databases.find(db => db.type === 'primary');
+                if (primaryDb) {
+                    $scope.checkDatabaseConnection(primaryDb);
+                }
+            }
         };
         
         // Check database connectivity
@@ -95,10 +95,7 @@ angular.module('appLensApp')
                 
                 if (response.data.success) {
                     // Load XML configurations from database
-                    $scope.loadXmlConfigurations(false, false);
-                } else {
-                    // Load demo XML configurations
-                    $scope.loadXmlConfigurations(false, true);
+                    $scope.loadXmlConfigurations();
                 }
             }).catch(function(error) {
                 $scope.databaseStatus.checking = false;
@@ -106,8 +103,6 @@ angular.module('appLensApp')
                 $scope.databaseStatus.connected = false;
                 $scope.databaseStatus.error = 'Connection test failed';
                 console.error('Database connection test failed:', error);
-                // Load demo XML configurations
-                $scope.loadXmlConfigurations(false, true);
             });
         };
         
@@ -123,21 +118,8 @@ angular.module('appLensApp')
         };
         
         // Load XML configurations
-        $scope.loadXmlConfigurations = function(refresh, useDemo) {
-            console.log('loadXmlConfigurations called with refresh:', refresh, 'useDemo:', useDemo);
-            
-            if (useDemo) {
-                // Demo mode - load sample configurations immediately
-                console.log('DEMO MODE: Activating demo mode with sample XML configurations');
-                $scope.xmlConfigStatus.loading = false;
-                $scope.xmlConfigStatus.xmlNames = ['app-config.xml', 'database-settings.xml', 'email-templates.xml', 'logging-config.xml', 'security-policies.xml', 'service-endpoints.xml', 'user-permissions.xml', 'validation-rules.xml'];
-                $scope.xmlConfigStatus.demoMode = true;
-                // Force scope update
-                $scope.$apply();
-                console.log('DEMO MODE: Demo mode activated - 8 sample XML configurations loaded');
-                console.log('DEMO MODE: xmlConfigStatus:', $scope.xmlConfigStatus);
-                return;
-            }
+        $scope.loadXmlConfigurations = function() {
+            console.log('Loading XML configurations from database');
             
             $scope.xmlConfigStatus.loading = true;
             
@@ -163,18 +145,15 @@ angular.module('appLensApp')
                     $scope.xmlConfigStatus.loading = false;
                     if (response.data.success) {
                         $scope.xmlConfigStatus.xmlNames = response.data.xml_names;
-                        $scope.xmlConfigStatus.demoMode = response.data.demo_mode;
                         console.log('Loaded XML configurations:', $scope.xmlConfigStatus.xmlNames);
                     } else {
                         console.error('Failed to load XML configurations:', response.data.error);
                         $scope.xmlConfigStatus.xmlNames = [];
-                        $scope.xmlConfigStatus.demoMode = false;
                     }
                 }).catch(function(error) {
                     $scope.xmlConfigStatus.loading = false;
                     console.error('Error loading XML configurations:', error);
                     $scope.xmlConfigStatus.xmlNames = [];
-                    $scope.xmlConfigStatus.demoMode = false;
                 });
         };
         
@@ -183,13 +162,6 @@ angular.module('appLensApp')
             if (!xmlName) return;
             
             console.log('Opening XML viewer in new tab for:', xmlName);
-            
-            // If in demo mode, show demo content
-            if ($scope.xmlConfigStatus.demoMode) {
-                var content = getDemoXmlContent(xmlName);
-                openXmlViewer(xmlName, content);
-                return;
-            }
             
             var environment = SharedDataService.getSelectedEnvironment();
             var payload = {
@@ -597,41 +569,11 @@ angular.module('appLensApp')
 </html>`;
         }
         
-        // Get demo XML content
-        function getDemoXmlContent(xmlName) {
-            var demoContents = {
-                'app-config.xml': '<?xml version="1.0" encoding="UTF-8"?>\n<configuration>\n    <appSettings>\n        <add key="Environment" value="Development" />\n        <add key="LogLevel" value="Info" />\n        <add key="MaxConnections" value="100" />\n    </appSettings>\n</configuration>',
-                'database-settings.xml': '<?xml version="1.0" encoding="UTF-8"?>\n<databaseConfig>\n    <connectionString>Server=demo-server;Database=demo-db;Trusted_Connection=true;</connectionString>\n    <timeout>30</timeout>\n    <poolSize>50</poolSize>\n</databaseConfig>',
-                'email-templates.xml': '<?xml version="1.0" encoding="UTF-8"?>\n<emailTemplates>\n    <template id="welcome">\n        <subject>Welcome to AppLens!</subject>\n        <body>Thank you for joining our platform.</body>\n    </template>\n</emailTemplates>',
-                'logging-config.xml': '<?xml version="1.0" encoding="UTF-8"?>\n<logging>\n    <level>DEBUG</level>\n    <appenders>\n        <file>logs/app.log</file>\n        <console>true</console>\n    </appenders>\n</logging>',
-                'security-policies.xml': '<?xml version="1.0" encoding="UTF-8"?>\n<securityPolicies>\n    <authentication>\n        <method>JWT</method>\n        <expiration>3600</expiration>\n    </authentication>\n</securityPolicies>',
-                'service-endpoints.xml': '<?xml version="1.0" encoding="UTF-8"?>\n<serviceEndpoints>\n    <endpoint name="UserService" url="https://api.example.com/users" />\n    <endpoint name="OrderService" url="https://api.example.com/orders" />\n</serviceEndpoints>',
-                'user-permissions.xml': '<?xml version="1.0" encoding="UTF-8"?>\n<userPermissions>\n    <role name="Admin">\n        <permission>CREATE</permission>\n        <permission>READ</permission>\n        <permission>UPDATE</permission>\n        <permission>DELETE</permission>\n    </role>\n</userPermissions>',
-                'validation-rules.xml': '<?xml version="1.0" encoding="UTF-8"?>\n<validationRules>\n    <rule field="email" pattern="^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}$" />\n    <rule field="phone" pattern="^\\+?[1-9]\\d{1,14}$" />\n</validationRules>'
-            };
-            
-            return demoContents[xmlName] || '<?xml version="1.0" encoding="UTF-8"?>\n<demo>\n    <message>Demo XML content for ' + xmlName + '</message>\n    <note>This is sample content for demonstration purposes.</note>\n</demo>';
-        }
+
         
         // Download XML content
         $scope.downloadXmlContent = function(xmlName) {
             if (!xmlName) return;
-            
-            // If in demo mode, download demo content directly
-            if ($scope.xmlConfigStatus.demoMode) {
-                console.log('Downloading demo XML content for:', xmlName);
-                var content = getDemoXmlContent(xmlName);
-                var blob = new Blob([content], { type: 'application/xml' });
-                var url = window.URL.createObjectURL(blob);
-                var a = document.createElement('a');
-                a.href = url;
-                a.download = xmlName;
-                document.body.appendChild(a);
-                a.click();
-                window.URL.revokeObjectURL(url);
-                document.body.removeChild(a);
-                return;
-            }
             
             var environment = SharedDataService.getSelectedEnvironment();
             var payload = {

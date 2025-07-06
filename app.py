@@ -205,15 +205,6 @@ def get_xml_configurations():
     try:
         data = request.get_json()
         db_config = data.get('database_config')
-        use_demo = data.get('use_demo', False)
-        
-        if use_demo:
-            xml_names = database_service.get_demo_xml_names()
-            return jsonify({
-                "success": True,
-                "xml_names": xml_names,
-                "demo_mode": True
-            })
         
         if not db_config:
             return jsonify({"error": "No database configuration provided"}), 400
@@ -223,8 +214,7 @@ def get_xml_configurations():
         return jsonify({
             "success": success,
             "xml_names": xml_names,
-            "error": error_msg,
-            "demo_mode": False
+            "error": error_msg
         })
         
     except Exception as e:
@@ -238,19 +228,9 @@ def get_xml_content():
         data = request.get_json()
         db_config = data.get('database_config')
         xml_name = data.get('xml_name')
-        use_demo = data.get('use_demo', False)
         
         if not xml_name:
             return jsonify({"error": "No XML name provided"}), 400
-        
-        if use_demo:
-            xml_content = database_service.get_demo_xml_content(xml_name)
-            return jsonify({
-                "success": True,
-                "xml_content": xml_content,
-                "xml_name": xml_name,
-                "demo_mode": True
-            })
         
         if not db_config:
             return jsonify({"error": "No database configuration provided"}), 400
@@ -261,8 +241,7 @@ def get_xml_content():
             "success": success,
             "xml_content": xml_content,
             "xml_name": xml_name,
-            "error": error_msg,
-            "demo_mode": False
+            "error": error_msg
         })
         
     except Exception as e:
@@ -276,19 +255,14 @@ def download_xml_content():
         data = request.get_json()
         db_config = data.get('database_config')
         xml_name = data.get('xml_name')
-        use_demo = data.get('use_demo', False)
         
         if not xml_name:
             return jsonify({"error": "No XML name provided"}), 400
         
-        if use_demo:
-            xml_content = database_service.get_demo_xml_content(xml_name)
-            success = True
-            error_msg = ""
-        else:
-            if not db_config:
-                return jsonify({"error": "No database configuration provided"}), 400
-            success, xml_content, error_msg = database_service.get_xml_content(db_config, xml_name)
+        if not db_config:
+            return jsonify({"error": "No database configuration provided"}), 400
+            
+        success, xml_content, error_msg = database_service.get_xml_content(db_config, xml_name)
         
         if not success:
             return jsonify({"error": error_msg}), 500
@@ -316,24 +290,9 @@ def search_xml_configurations():
         data = request.get_json()
         db_config = data.get('database_config')
         search_term = data.get('search_term', '').strip()
-        use_demo = data.get('use_demo', False)
         
         if not search_term:
             return jsonify({"error": "No search term provided"}), 400
-        
-        if use_demo:
-            # Demo search functionality
-            demo_names = database_service.get_demo_xml_names()
-            results = [
-                {"name": name, "preview": f"Demo configuration: {name}"}
-                for name in demo_names
-                if search_term.lower() in name.lower()
-            ]
-            return jsonify({
-                "success": True,
-                "results": results,
-                "demo_mode": True
-            })
         
         if not db_config:
             return jsonify({"error": "No database configuration provided"}), 400
@@ -343,8 +302,7 @@ def search_xml_configurations():
         return jsonify({
             "success": success,
             "results": results,
-            "error": error_msg,
-            "demo_mode": False
+            "error": error_msg
         })
         
     except Exception as e:
