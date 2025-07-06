@@ -224,6 +224,168 @@
                     </div>
                 </div>
                 
+                <!-- Database Configuration -->
+                <div class="row mt-3">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header bg-light">
+                                <h6 class="mb-0">
+                                    <i class="fas fa-database me-2"></i>
+                                    Database Configuration
+                                </h6>
+                            </div>
+                            <div class="card-body">
+                                <div ng-if="selectedEnvironment.databases && selectedEnvironment.databases.length > 0">
+                                    <div class="row" ng-repeat="db in selectedEnvironment.databases">
+                                        <div class="col-md-6 mb-3">
+                                            <div class="card border-start border-4" ng-class="{'border-primary': db.type === 'primary', 'border-secondary': db.type === 'secondary'}">
+                                                <div class="card-body">
+                                                    <h6 class="card-title">
+                                                        <i class="fas fa-database me-1"></i>
+                                                        {{db.name}}
+                                                        <span class="badge ms-2" ng-class="{'bg-primary': db.type === 'primary', 'bg-secondary': db.type === 'secondary'}">
+                                                            {{db.type | uppercase}}
+                                                        </span>
+                                                    </h6>
+                                                    <div class="row">
+                                                        <div class="col-6">
+                                                            <small class="text-muted">Host:</small>
+                                                            <div class="d-flex align-items-center">
+                                                                <code class="flex-grow-1">{{db.host}}</code>
+                                                                <button class="btn btn-sm btn-outline-secondary ms-1" ng-click="copyToClipboard(db.host)">
+                                                                    <i class="fas fa-copy"></i>
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-6">
+                                                            <small class="text-muted">Port:</small>
+                                                            <div class="d-flex align-items-center">
+                                                                <code class="flex-grow-1">{{db.port}}</code>
+                                                                <button class="btn btn-sm btn-outline-secondary ms-1" ng-click="copyToClipboard(db.port)">
+                                                                    <i class="fas fa-copy"></i>
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-6">
+                                                            <small class="text-muted">Database:</small>
+                                                            <div class="d-flex align-items-center">
+                                                                <code class="flex-grow-1">{{db.database}}</code>
+                                                                <button class="btn btn-sm btn-outline-secondary ms-1" ng-click="copyToClipboard(db.database)">
+                                                                    <i class="fas fa-copy"></i>
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-6">
+                                                            <small class="text-muted">Username:</small>
+                                                            <div class="d-flex align-items-center">
+                                                                <code class="flex-grow-1">{{db.username}}</code>
+                                                                <button class="btn btn-sm btn-outline-secondary ms-1" ng-click="copyToClipboard(db.username)">
+                                                                    <i class="fas fa-copy"></i>
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-12">
+                                                            <small class="text-muted">Password:</small>
+                                                            <div class="d-flex align-items-center">
+                                                                <code class="flex-grow-1">{{db.password}}</code>
+                                                                <button class="btn btn-sm btn-outline-secondary ms-1" ng-click="copyToClipboard(db.password)">
+                                                                    <i class="fas fa-copy"></i>
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div ng-if="!selectedEnvironment.databases || selectedEnvironment.databases.length === 0" class="text-center text-muted py-3">
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    No database configuration found for this environment.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Microservices Configuration -->
+                <div class="row mt-3">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header bg-light">
+                                <h6 class="mb-0">
+                                    <i class="fas fa-cubes me-2"></i>
+                                    Microservices Configuration
+                                </h6>
+                            </div>
+                            <div class="card-body">
+                                <div ng-if="selectedEnvironment.microservices && selectedEnvironment.microservices.length > 0">
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3" ng-repeat="service in selectedEnvironment.microservices">
+                                            <div class="card">
+                                                <div class="card-body">
+                                                    <h6 class="card-title">
+                                                        <i class="fas fa-cube me-1"></i>
+                                                        {{service.name}}
+                                                        <span class="badge ms-2" ng-class="{'bg-success': service.status === 'online', 'bg-danger': service.status === 'offline', 'bg-warning': service.status === 'maintenance'}">
+                                                            {{service.status | uppercase}}
+                                                        </span>
+                                                    </h6>
+                                                    <div class="row">
+                                                        <div class="col-12 mb-2">
+                                                            <small class="text-muted">Server URL:</small>
+                                                            <div class="d-flex align-items-center">
+                                                                <a href="{{service.server_url}}" target="_blank" class="text-decoration-none me-2 flex-grow-1 text-truncate">
+                                                                    <i class="fas fa-external-link-alt me-1"></i>
+                                                                    {{service.server_url}}
+                                                                </a>
+                                                                <button class="btn btn-sm btn-outline-secondary" ng-click="copyToClipboard(service.server_url)">
+                                                                    <i class="fas fa-copy"></i>
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-6">
+                                                            <small class="text-muted">Port:</small>
+                                                            <div class="d-flex align-items-center">
+                                                                <code class="flex-grow-1">{{service.port}}</code>
+                                                                <button class="btn btn-sm btn-outline-secondary ms-1" ng-click="copyToClipboard(service.port)">
+                                                                    <i class="fas fa-copy"></i>
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-6">
+                                                            <small class="text-muted">Git Type:</small>
+                                                            <div class="d-flex align-items-center">
+                                                                <code class="flex-grow-1">{{service.git_type}}</code>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-12">
+                                                            <small class="text-muted">Git Build:</small>
+                                                            <div class="d-flex align-items-center">
+                                                                <a href="{{service.git_build_url}}" target="_blank" class="text-decoration-none me-2 flex-grow-1 text-truncate">
+                                                                    <i class="fas fa-{{service.git_type === 'branch' ? 'code-branch' : 'tag'}} me-1"></i>
+                                                                    {{service.git_build_url}}
+                                                                </a>
+                                                                <button class="btn btn-sm btn-outline-secondary" ng-click="copyToClipboard(service.git_build_url)">
+                                                                    <i class="fas fa-copy"></i>
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div ng-if="!selectedEnvironment.microservices || selectedEnvironment.microservices.length === 0" class="text-center text-muted py-3">
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    No microservices configuration found for this environment.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
                 <!-- Database Status -->
                 <div class="row mt-3">
                     <div class="col-12">

@@ -42,6 +42,7 @@ angular.module('appLensApp')
         // View environment details in modal
         $scope.viewEnvironmentDetails = function(environment) {
             SharedDataService.setSelectedEnvironment(environment);
+            $scope.selectedEnvironment = environment;
             var modal = new bootstrap.Modal(document.getElementById('environmentModal'));
             modal.show();
             
