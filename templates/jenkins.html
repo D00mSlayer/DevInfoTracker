@@ -1,0 +1,61 @@
+<!-- Jenkins Bookmarks View -->
+<div class="container-fluid bg-light py-4 mb-4">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-12">
+                <h1 class="mb-0 text-primary">
+                    <i class="fas fa-bookmark me-2"></i>
+                    Jenkins Bookmarks
+                </h1>
+                <p class="mb-0 text-muted">AppLens - Jenkins Job Directory</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Jenkins Jobs -->
+<div class="container">
+    <div class="card shadow">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">
+                <i class="fas fa-bookmark me-2"></i>
+                Jenkins Jobs Directory
+            </h5>
+        </div>
+        <div class="card-body">
+            <div class="mb-3">
+                <input type="text" class="form-control" placeholder="Search Jenkins jobs..." 
+                       ng-model="jenkinsSearchQuery">
+            </div>
+            <div class="row">
+                <div class="col-md-6 mb-3" ng-repeat="job in jenkinsJobs | filter:jenkinsSearchQuery">
+                    <div class="card border-start border-4 border-success">
+                        <div class="card-body p-3">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <h6 class="mb-0">{{job.name}}</h6>
+                                <span class="badge bg-secondary">{{job.team}}</span>
+                            </div>
+                            <p class="text-muted small mb-3">{{job.description}}</p>
+                            <div class="d-flex gap-2">
+                                <a href="{{job.url}}" target="_blank" class="btn btn-sm btn-outline-primary">
+                                    <i class="fas fa-external-link-alt me-1"></i>
+                                    Open Jenkins
+                                </a>
+                                <button class="btn btn-sm btn-outline-secondary" ng-click="copyToClipboard(job.url)">
+                                    <i class="fas fa-copy me-1"></i>
+                                    Copy URL
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="text-center mt-4" ng-if="jenkinsJobs.length === 0">
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i>
+                    No Jenkins jobs configured. Add them to your data.yaml file.
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

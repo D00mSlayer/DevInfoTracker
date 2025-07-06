@@ -39,6 +39,16 @@ def index():
     data = load_data()
     return render_template('index.html', data=data)
 
+@app.route('/templates/environments')
+def environments_template():
+    """Serve environments template"""
+    return render_template('environments.html')
+
+@app.route('/templates/jenkins')
+def jenkins_template():
+    """Serve jenkins template"""
+    return render_template('jenkins.html')
+
 @app.route('/api/data')
 def get_data():
     """API endpoint to get all data"""
