@@ -49,6 +49,11 @@ def jenkins_template():
     """Serve jenkins template"""
     return render_template('jenkins.html')
 
+@app.route('/templates/jira')
+def jira_template():
+    """Serve jira template"""
+    return render_template('jira.html')
+
 @app.route('/api/data')
 def get_data():
     """API endpoint to get all data"""

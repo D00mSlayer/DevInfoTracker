@@ -24,6 +24,12 @@
                             Jenkins Bookmarks
                         </a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="javascript:void(0)" ng-click="setCurrentView('jira')" ng-class="{'active': currentView === 'jira'}">
+                            <i class="fas fa-bug me-1"></i>
+                            Jira Analysis
+                        </a>
+                    </li>
                 </ul>
             </div>
         </div>
@@ -42,6 +48,9 @@
     
     <!-- Jenkins Bookmarks View -->
     <div ng-if="currentView === 'jenkins' && !loading" ng-controller="JenkinsController" ng-include="'/templates/jenkins'"></div>
+    
+    <!-- Jira Analysis View -->
+    <div ng-if="currentView === 'jira' && !loading" ng-controller="JiraController" ng-include="'/templates/jira'"></div>
 </div>
 
 <!-- Environment Details Modal (Shared) -->

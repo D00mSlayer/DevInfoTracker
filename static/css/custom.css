@@ -452,6 +452,95 @@ body {
     color: var(--pure-white);
 }
 
+/* Jira Analysis Styles */
+.ticket-hierarchy {
+    position: relative;
+}
+
+.ticket-item {
+    position: relative;
+}
+
+.ticket-item::before {
+    content: '';
+    position: absolute;
+    left: -15px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: var(--light-gray);
+}
+
+.ticket-item:last-child::before {
+    bottom: 50%;
+}
+
+.ticket-item::after {
+    content: '';
+    position: absolute;
+    left: -15px;
+    top: 20px;
+    width: 15px;
+    height: 2px;
+    background: var(--light-gray);
+}
+
+.git-links {
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.git-links::-webkit-scrollbar {
+    width: 6px;
+}
+
+.git-links::-webkit-scrollbar-track {
+    background: var(--light-gray);
+    border-radius: 3px;
+}
+
+.git-links::-webkit-scrollbar-thumb {
+    background: var(--text-muted);
+    border-radius: 3px;
+}
+
+.git-links::-webkit-scrollbar-thumb:hover {
+    background: var(--primary-blue);
+}
+
+.stat-box {
+    padding: 1rem;
+    border-radius: 8px;
+    background: var(--pure-white);
+    border: 1px solid var(--light-gray);
+    transition: all 0.3s ease;
+}
+
+.stat-box:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    transform: translateY(-2px);
+}
+
+.border-primary {
+    border-color: var(--primary-blue) !important;
+}
+
+.border-success {
+    border-color: var(--success-green) !important;
+}
+
+.border-info {
+    border-color: var(--info-blue) !important;
+}
+
+.border-warning {
+    border-color: var(--warning-yellow) !important;
+}
+
+.border-danger {
+    border-color: var(--danger-red) !important;
+}
+
 /* Large screen optimizations */
 @media (min-width: 1400px) {
     .container {
