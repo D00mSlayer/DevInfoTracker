@@ -11,9 +11,15 @@ angular.module('appLensApp')
         $scope.sampleAnalysisData = {
             summary: {
                 totalTickets: 7,
-                totalGitLinks: 12,
+                totalGitLinks: 14,
                 maxDepth: 3,
-                ticketTypes: 4
+                ticketTypeBreakdown: {
+                    'Epic': 1,
+                    'User Story': 2,
+                    'Task': 2,
+                    'Sub-task': 2,
+                    'Bug': 1
+                }
             },
             tickets: [
                 {
@@ -32,6 +38,16 @@ angular.module('appLensApp')
                         {
                             url: 'https://github.com/company/auth-service/commit/abc123def456',
                             type: 'Commit',
+                            commentedBy: 'John Smith'
+                        },
+                        {
+                            url: 'https://github.com/company/auth-service/branch/feature/oauth-redesign',
+                            type: 'Branch',
+                            commentedBy: 'John Smith'
+                        },
+                        {
+                            url: 'https://github.com/company/documentation/pull/78',
+                            type: 'Pull Request',
                             commentedBy: 'John Smith'
                         }
                     ],

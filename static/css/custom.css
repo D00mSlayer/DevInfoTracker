@@ -486,8 +486,40 @@ body {
 }
 
 .git-links {
-    max-height: 200px;
+    max-height: 300px;
     overflow-y: auto;
+    border: 1px solid var(--light-gray);
+    border-radius: 6px;
+    padding: 0.5rem;
+    background: #f8f9fa;
+}
+
+.git-link-item {
+    display: flex;
+    align-items: center;
+    padding: 0.25rem 0;
+    border-bottom: 1px solid #e9ecef;
+    margin-bottom: 0.25rem;
+}
+
+.git-link-item:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+}
+
+.git-link-url {
+    flex: 1;
+    min-width: 0;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+    font-size: 0.875rem;
+}
+
+.git-link-meta {
+    font-size: 0.75rem;
+    color: #6c757d;
+    margin-top: 0.125rem;
 }
 
 .git-links::-webkit-scrollbar {
@@ -539,6 +571,20 @@ body {
 
 .border-danger {
     border-color: var(--danger-red) !important;
+}
+
+.ticket-type-breakdown {
+    text-align: left;
+    font-size: 0.875rem;
+    line-height: 1.4;
+}
+
+.ticket-type-breakdown div {
+    margin-bottom: 0.125rem;
+}
+
+.ticket-type-breakdown div:last-child {
+    margin-bottom: 0;
 }
 
 /* Large screen optimizations */

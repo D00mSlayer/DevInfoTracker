@@ -24,21 +24,17 @@
             </h5>
         </div>
         <div class="card-body">
-            <div class="row">
-                <div class="col-md-8">
-                    <div class="mb-3">
-                        <label class="form-label fw-bold">Jira Ticket ID:</label>
-                        <input type="text" class="form-control" placeholder="Enter Jira ticket ID (e.g., PROJ-1234)" 
-                               ng-model="jiraTicketId">
-                        <small class="text-muted">Enter the parent ticket ID to analyze its hierarchy and extract git links</small>
-                    </div>
-                </div>
-                <div class="col-md-4 d-flex align-items-end">
-                    <button class="btn btn-primary w-100 mb-3" ng-click="analyzeJiraTicket(jiraTicketId)" ng-disabled="!jiraTicketId">
+            <div class="mb-3">
+                <label class="form-label fw-bold">Jira Ticket ID:</label>
+                <div class="input-group">
+                    <input type="text" class="form-control" placeholder="Enter Jira ticket ID (e.g., PROJ-1234)" 
+                           ng-model="jiraTicketId">
+                    <button class="btn btn-primary" ng-click="analyzeJiraTicket(jiraTicketId)" ng-disabled="!jiraTicketId">
                         <i class="fas fa-play me-1"></i>
                         Analyze Ticket
                     </button>
                 </div>
+                <small class="text-muted">Enter the parent ticket ID to analyze its hierarchy and extract git links</small>
             </div>
         </div>
     </div>
@@ -76,7 +72,11 @@
                     <div class="col-md-3">
                         <div class="stat-box">
                             <small class="text-muted d-block">Ticket Types</small>
-                            <strong class="text-warning fs-4">{{analysisResults.summary.ticketTypes}}</strong>
+                            <div class="ticket-type-breakdown">
+                                <div ng-repeat="(type, count) in analysisResults.summary.ticketTypeBreakdown" class="small">
+                                    <strong>{{type}}:</strong> {{count}}
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -147,17 +147,21 @@
                                 Git Links ({{ticketData.gitLinks.length}})
                             </h6>
                             <div class="git-links">
-                                <div ng-repeat="link in ticketData.gitLinks" class="mb-2">
-                                    <div class="d-flex align-items-center">
-                                        <a href="{{link.url}}" target="_blank" class="text-decoration-none small flex-grow-1 text-truncate">
-                                            <i class="fab fa-git-alt me-1"></i>
-                                            {{link.url}}
-                                        </a>
-                                        <button class="btn btn-sm btn-outline-secondary ms-1" ng-click="copyToClipboard(link.url)">
-                                            <i class="fas fa-copy"></i>
-                                        </button>
+                                <div ng-repeat="link in ticketData.gitLinks" class="git-link-item">
+                                    <div class="flex-grow-1">
+                                        <div class="git-link-url">
+                                            <a href="{{link.url}}" target="_blank" class="text-decoration-none">
+                                                <i class="fab fa-git-alt me-1"></i>
+                                                {{link.url}}
+                                            </a>
+                                        </div>
+                                        <div class="git-link-meta">
+                                            {{link.type}} - {{link.commentedBy}}
+                                        </div>
                                     </div>
-                                    <small class="text-muted">{{link.type}} - {{link.commentedBy}}</small>
+                                    <button class="btn btn-sm btn-outline-secondary ms-2" ng-click="copyToClipboard(link.url)" title="Copy to clipboard">
+                                        <i class="fas fa-copy"></i>
+                                    </button>
                                 </div>
                             </div>
                         </div>
