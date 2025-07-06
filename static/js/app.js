@@ -6,6 +6,10 @@ angular.module('productApp', [])
         $scope.searchQuery = '';
         $scope.searchResults = [];
         $scope.loading = true;
+        $scope.selectedProduct = null;
+        $scope.selectedVersions = {};
+        $scope.selectedEnvironment = null;
+        $scope.configSearchTerm = '';
         
         // Load initial data
         $scope.init = function() {
@@ -85,6 +89,27 @@ angular.module('productApp', [])
         
         $scope.getGitLabel = function(gitType) {
             return gitType === 'branch' ? 'Branch' : 'Tag';
+        };
+        
+        // Product selection
+        $scope.selectProduct = function(product, index) {
+            $scope.selectedProduct = product;
+            $scope.selectedVersions = {};
+        };
+        
+        // View environment details in modal
+        $scope.viewEnvironmentDetails = function(environment) {
+            $scope.selectedEnvironment = environment;
+            var modal = new bootstrap.Modal(document.getElementById('environmentModal'));
+            modal.show();
+        };
+        
+        // Configuration search function (enhanced)
+        $scope.searchConfigurations = function(environment, searchTerm) {
+            console.log('Searching configurations for:', environment, 'term:', searchTerm);
+            // This would typically make an API call to search XML configurations
+            // For now, it's a placeholder
+            alert('Configuration search feature will be implemented to search through XML files in the database.');
         };
         
         // Initialize the application
