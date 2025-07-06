@@ -1,6 +1,6 @@
-{% extends "base.html" %}
+[% extends "base.html" %]
 
-{% block content %}
+[% block content %]
 <div ng-app="productApp" ng-controller="ProductController">
     <!-- Search Section -->
     <div class="container mb-4">
@@ -211,11 +211,11 @@
         </div>
     </div>
 </div>
-{% endblock %}
+[% endblock %]
 
-{% block scripts %}
+[% block scripts %]
 <script>
     // Pass data from Flask to AngularJS
-    window.productData = {{ data | tojson }};
+    window.productData = [[ data | tojson ]];
 </script>
-{% endblock %}
+[% endblock %]
