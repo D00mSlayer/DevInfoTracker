@@ -181,3 +181,55 @@ products:
                     git_build_url: "https://github.com/company/user-service/releases/tag/v1.0.3"
                     git_type: "tag"
                     status: "online"
+
+# Jenkins Jobs for Developer Bookmarks
+jenkins_jobs:
+  - name: "Main E-Commerce Build"
+    team: "Platform Team"
+    description: "Main build pipeline for the e-commerce platform"
+    url: "https://jenkins.company.com/job/ecommerce-platform-build"
+  
+  - name: "User Service Build"
+    team: "User Team"
+    description: "Build and deploy pipeline for user microservice"
+    url: "https://jenkins.company.com/job/user-service-build"
+  
+  - name: "Order Service Build"
+    team: "Order Team"
+    description: "Build and deploy pipeline for order microservice"
+    url: "https://jenkins.company.com/job/order-service-build"
+  
+  - name: "Payment Service Build"
+    team: "Payment Team"
+    description: "Build and deploy pipeline for payment microservice"
+    url: "https://jenkins.company.com/job/payment-service-build"
+  
+  - name: "Database Migration"
+    team: "Platform Team"
+    description: "Database migration scripts execution"
+    url: "https://jenkins.company.com/job/database-migration"
+  
+  - name: "Integration Tests"
+    team: "QA Team"
+    description: "End-to-end integration test suite"
+    url: "https://jenkins.company.com/job/integration-tests"
+  
+  - name: "Performance Tests"
+    team: "QA Team"
+    description: "Performance and load testing pipeline"
+    url: "https://jenkins.company.com/job/performance-tests"
+  
+  - name: "Security Scan"
+    team: "Security Team"
+    description: "Security vulnerability scanning"
+    url: "https://jenkins.company.com/job/security-scan"
+  
+  - name: "Client A Deployment"
+    team: "Client A Team"
+    description: "Client A specific deployment pipeline"
+    url: "https://jenkins.company.com/job/clienta-deployment"
+  
+  - name: "Notification Service"
+    team: "Platform Team"
+    description: "Notification service build and deployment"
+    url: "https://jenkins.company.com/job/notification-service"

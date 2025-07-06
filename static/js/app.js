@@ -11,10 +11,16 @@ angular.module('productApp', [])
         $scope.selectedEnvironment = null;
         $scope.configSearchTerm = '';
         
+        // Jenkins bookmarks functionality
+        $scope.currentView = 'environments';
+        $scope.jenkinsJobs = [];
+        $scope.jenkinsSearchQuery = '';
+        
         // Load initial data
         $scope.init = function() {
             if (typeof window.productData !== 'undefined') {
                 $scope.products = window.productData.products || [];
+                $scope.jenkinsJobs = window.productData.jenkins_jobs || [];
                 // Set the first (and likely only) product as the main product
                 if ($scope.products.length > 0) {
                     $scope.mainProduct = $scope.products[0];
@@ -25,6 +31,7 @@ angular.module('productApp', [])
                 $http.get('/api/data')
                     .then(function(response) {
                         $scope.products = response.data.products || [];
+                        $scope.jenkinsJobs = response.data.jenkins_jobs || [];
                         // Set the first product as main product
                         if ($scope.products.length > 0) {
                             $scope.mainProduct = $scope.products[0];
@@ -142,6 +149,11 @@ angular.module('productApp', [])
                 }
                 document.body.removeChild(textArea);
             }
+        };
+        
+        // View switching functionality
+        $scope.setCurrentView = function(viewName) {
+            $scope.currentView = viewName;
         };
         
         // Initialize the application

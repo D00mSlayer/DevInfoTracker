@@ -28,10 +28,10 @@ def load_data():
             return data
     except FileNotFoundError:
         logging.error("data.yaml file not found")
-        return {"products": []}
+        return {"products": [], "jenkins_jobs": []}
     except yaml.YAMLError as e:
         logging.error(f"Error parsing YAML: {e}")
-        return {"products": []}
+        return {"products": [], "jenkins_jobs": []}
 
 @app.route('/')
 def index():
