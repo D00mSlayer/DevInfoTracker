@@ -18,9 +18,9 @@
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular.min.js"></script>
 </head>
 <body>
-    <nav class="navbar navbar-expand-lg navbar-light bg-light border-bottom">
+    <nav class="navbar navbar-expand-lg navbar-light bg-light border-bottom" ng-app="appLensApp" ng-controller="MainController">
         <div class="container">
-            <a class="navbar-brand" href="[[ url_for('index') ]]">
+            <a class="navbar-brand" href="javascript:void(0)">
                 <i class="fas fa-search me-2"></i>
                 AppLens
             </a>
@@ -30,9 +30,15 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item">
-                        <a class="nav-link" href="[[ url_for('index') ]]">
-                            <i class="fas fa-home me-1"></i>
-                            Environment Dashboard
+                        <a class="nav-link" href="javascript:void(0)" ng-click="setCurrentView('environments')" ng-class="{'active': currentView === 'environments'}">
+                            <i class="fas fa-server me-1"></i>
+                            Environments
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="javascript:void(0)" ng-click="setCurrentView('jenkins')" ng-class="{'active': currentView === 'jenkins'}">
+                            <i class="fas fa-bookmark me-1"></i>
+                            Jenkins Bookmarks
                         </a>
                     </li>
                 </ul>
@@ -40,7 +46,7 @@
         </div>
     </nav>
 
-    <main class="container mt-4">
+    <main class="container-fluid mt-0" ng-app="appLensApp" ng-controller="MainController">
         [% block content %][% endblock %]
     </main>
 
