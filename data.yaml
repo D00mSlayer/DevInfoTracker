@@ -33,19 +33,16 @@ products:
                     port: 8080
                     git_build_url: "https://github.com/company/user-service/tree/develop"
                     git_type: "branch"
-                    status: "online"
                   - name: "order-service"
                     server_url: "https://order-service-dev.company.com"
                     port: 8081
                     git_build_url: "https://github.com/company/order-service/tree/develop"
                     git_type: "branch"
-                    status: "online"
                   - name: "payment-service"
                     server_url: "https://payment-service-dev.company.com"
                     port: 8082
                     git_build_url: "https://github.com/company/payment-service/tree/develop"
                     git_type: "branch"
-                    status: "online"
               - name: "qa"
                 site_url: "https://qa.ecommerce.company.com"
                 git_build_url: "https://github.com/company/ecommerce/tree/qa"
@@ -64,13 +61,11 @@ products:
                     port: 8080
                     git_build_url: "https://github.com/company/user-service/tree/qa"
                     git_type: "branch"
-                    status: "online"
                   - name: "order-service"
                     server_url: "https://order-service-qa.company.com"
                     port: 8081
                     git_build_url: "https://github.com/company/order-service/tree/qa"
                     git_type: "branch"
-                    status: "online"
               - name: "prod"
                 site_url: "https://ecommerce.company.com"
                 git_build_url: "https://github.com/company/ecommerce/releases/tag/v1.2.3"
@@ -96,13 +91,11 @@ products:
                     port: 8080
                     git_build_url: "https://github.com/company/user-service/releases/tag/v1.2.1"
                     git_type: "tag"
-                    status: "online"
                   - name: "order-service"
                     server_url: "https://order-service.company.com"
                     port: 8081
                     git_build_url: "https://github.com/company/order-service/releases/tag/v1.2.0"
                     git_type: "tag"
-                    status: "online"
           - name: "v2"
             description: "Version 2.0 with enhanced features"
             environments:
@@ -124,19 +117,16 @@ products:
                     port: 8080
                     git_build_url: "https://github.com/company/user-service/tree/v2-develop"
                     git_type: "branch"
-                    status: "online"
                   - name: "order-service"
                     server_url: "https://v2-order-service-dev.company.com"
                     port: 8081
                     git_build_url: "https://github.com/company/order-service/tree/v2-develop"
                     git_type: "branch"
-                    status: "online"
                   - name: "notification-service"
                     server_url: "https://v2-notification-service-dev.company.com"
                     port: 8083
                     git_build_url: "https://github.com/company/notification-service/tree/develop"
                     git_type: "branch"
-                    status: "online"
       - name: "Client A Customized"
         description: "Customized version for Client A"
         versions:
@@ -161,7 +151,6 @@ products:
                     port: 8080
                     git_build_url: "https://github.com/company/user-service/tree/clienta-uat"
                     git_type: "branch"
-                    status: "online"
               - name: "prod"
                 site_url: "https://clienta.ecommerce.company.com"
                 git_build_url: "https://github.com/company/ecommerce-clienta/releases/tag/v1.0.5"
@@ -180,7 +169,6 @@ products:
                     port: 8080
                     git_build_url: "https://github.com/company/user-service/releases/tag/v1.0.3"
                     git_type: "tag"
-                    status: "online"
 
 # Jenkins Jobs for Developer Bookmarks
 jenkins_jobs:

@@ -114,6 +114,11 @@ Production deployment would require:
 - Fixed database configuration layout to display primary and secondary databases side-by-side
 - Improved content alignment and spacing in database and microservice cards
 - Added copy-to-clipboard functionality for all database and microservice fields
+- Implemented real-time microservice health checks when environment modals are opened
+- Removed static status fields from data.yaml for all microservices
+- Added backend API endpoint for health checking with 5-second timeout
+- Added frontend health check functionality with "checking" status and spinner animation
+- Health checks perform HTTP GET requests to microservice URLs and determine online/offline status
 
 ## User Preferences
 

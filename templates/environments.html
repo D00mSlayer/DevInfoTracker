@@ -325,7 +325,8 @@
                                                     <h6 class="card-title">
                                                         <i class="fas fa-cube me-1"></i>
                                                         {{service.name}}
-                                                        <span class="badge ms-2" ng-class="{'bg-success': service.status === 'online', 'bg-danger': service.status === 'offline', 'bg-warning': service.status === 'maintenance'}">
+                                                        <span class="badge ms-2" ng-class="{'bg-success': service.status === 'online', 'bg-danger': service.status === 'offline', 'bg-warning': service.status === 'checking'}">
+                                                            <i class="fas fa-spinner fa-spin me-1" ng-if="service.status === 'checking'"></i>
                                                             {{service.status | uppercase}}
                                                         </span>
                                                     </h6>

@@ -1,6 +1,7 @@
 import os
 import yaml
 import logging
+import requests
 from flask import Flask, render_template, jsonify, request, Response
 from flask_cors import CORS
 from jira_gitlab_service import JiraGitLabService
@@ -352,6 +353,45 @@ def execute_sql_query():
             'success': False,
             'error': 'Internal server error'
         })
+
+@app.route('/api/microservice/health-check', methods=['POST'])
+def check_microservice_health():
+    """API endpoint to check microservice health"""
+    try:
+        data = request.get_json()
+        microservices = data.get('microservices', [])
+        
+        if not microservices:
+            return jsonify({"error": "No microservices provided"}), 400
+        
+        health_status = {}
+        
+        for service in microservices:
+            service_name = service.get('name')
+            server_url = service.get('server_url')
+            
+            if not service_name or not server_url:
+                health_status[service_name or 'unknown'] = 'offline'
+                continue
+            
+            try:
+                # Perform health check with 5 second timeout
+                response = requests.get(server_url, timeout=5, allow_redirects=True)
+                if response.status_code in [200, 301, 302, 404]:  # Consider redirects and 404s as "online"
+                    health_status[service_name] = 'online'
+                else:
+                    health_status[service_name] = 'offline'
+            except (requests.exceptions.RequestException, requests.exceptions.Timeout):
+                health_status[service_name] = 'offline'
+        
+        return jsonify({
+            "success": True,
+            "health_status": health_status
+        })
+        
+    except Exception as e:
+        logging.error(f"Error checking microservice health: {e}")
+        return jsonify({"error": "Internal server error"}), 500
 
 
 if __name__ == '__main__':

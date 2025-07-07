@@ -43,11 +43,22 @@ angular.module('appLensApp')
         $scope.viewEnvironmentDetails = function(environment) {
             SharedDataService.setSelectedEnvironment(environment);
             $scope.selectedEnvironment = environment;
+            
+            // Initialize microservice health status
+            if (environment.microservices) {
+                environment.microservices.forEach(function(service) {
+                    service.status = 'checking';
+                });
+            }
+            
             var modal = new bootstrap.Modal(document.getElementById('environmentModal'));
             modal.show();
             
             // Initialize database and XML management when modal opens
             $scope.initializeDatabaseAndXml(environment);
+            
+            // Perform health checks for microservices
+            $scope.checkMicroserviceHealth(environment);
         };
         
         // Initialize database connectivity and XML management
@@ -651,6 +662,35 @@ angular.module('appLensApp')
         };
         
 
+        
+        // Check microservice health
+        $scope.checkMicroserviceHealth = function(environment) {
+            if (!environment.microservices || environment.microservices.length === 0) {
+                return;
+            }
+            
+            $http.post('/api/microservice/health-check', {
+                microservices: environment.microservices
+            }).then(function(response) {
+                if (response.data.success) {
+                    // Update status for each microservice
+                    environment.microservices.forEach(function(service) {
+                        service.status = response.data.health_status[service.name] || 'offline';
+                    });
+                } else {
+                    // Set all to offline if health check failed
+                    environment.microservices.forEach(function(service) {
+                        service.status = 'offline';
+                    });
+                }
+            }).catch(function(error) {
+                console.error('Error checking microservice health:', error);
+                // Set all to offline if request failed
+                environment.microservices.forEach(function(service) {
+                    service.status = 'offline';
+                });
+            });
+        };
         
         // Copy to clipboard functionality
         $scope.copyToClipboard = function(text) {
