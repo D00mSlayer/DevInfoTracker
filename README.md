@@ -50,17 +50,25 @@ python main.py
 ### 3. Docker Deployment
 
 ```bash
-# Build the Docker image
-docker build -t applens .
+# Copy and customize your data configuration
+cp data.yaml.template data.yaml
+# Edit data.yaml with your actual environment data
 
-# Run with Docker Compose
+# Build and run with Docker Compose (recommended)
 docker-compose up -d
 
-# Or run directly
+# Or build and run directly with volume mount
+docker build -t applens .
 docker run -p 5000:5000 \
   -e SESSION_SECRET="your-secret-key-here" \
+  -v $(pwd)/data.yaml:/app/data.yaml:ro \
   applens
 ```
+
+**Note**: The Docker setup mounts your local `data.yaml` file as a read-only volume. This means:
+- Changes to `data.yaml` on your host machine will be reflected in the Docker container
+- You can update environment configurations without rebuilding the Docker image
+- The application will automatically reload when you modify the data file
 
 ### 4. Configuration
 
@@ -75,10 +83,12 @@ Edit `data.yaml` with your environment information:
 
 ### 5. Security Considerations
 
-- **data.yaml**: Contains sensitive information (passwords, URLs) - never commit to version control
+- **data.yaml**: Contains sensitive information (passwords, URLs) - be careful when committing to version control
+- **Docker Volume Mounting**: The `data.yaml` file is mounted as read-only for live updates
 - **SESSION_SECRET**: Use a strong secret key in production
 - **Database Credentials**: Store securely, consider using environment variables
 - **API Keys**: Use environment variables for Jira/GitLab API keys if using those features
+- **File Permissions**: Ensure `data.yaml` has appropriate file permissions (600 recommended)
 
 ### 6. Optional Features
 

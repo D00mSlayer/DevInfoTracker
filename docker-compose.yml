@@ -8,6 +8,8 @@ services:
     environment:
       - SESSION_SECRET=${SESSION_SECRET:-dev-secret-key}
       - FLASK_ENV=production
+    volumes:
+      - ./data.yaml:/app/data.yaml:ro
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:5000/"]

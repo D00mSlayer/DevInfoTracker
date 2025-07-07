@@ -1,5 +1,5 @@
 # Data files - contains sensitive environment information
-data.yaml
+# data.yaml - commented out to allow volume mounting in Docker
 
 # Python
 __pycache__/
