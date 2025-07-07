@@ -247,53 +247,49 @@
                                                             {{db.type | uppercase}}
                                                         </span>
                                                     </h6>
-                                                    <div class="mb-2">
-                                                        <small class="text-muted d-block">Host:</small>
+                                                    <div class="mb-3">
+                                                        <label class="form-label fw-bold">Host:</label>
                                                         <div class="d-flex align-items-center">
-                                                            <code class="flex-grow-1 text-truncate">{{db.host}}</code>
-                                                            <button class="btn btn-sm btn-outline-secondary ms-1" ng-click="copyToClipboard(db.host)">
+                                                            <code class="flex-grow-1 me-2">{{db.host}}</code>
+                                                            <button class="btn btn-sm btn-outline-secondary" ng-click="copyToClipboard(db.host)">
                                                                 <i class="fas fa-copy"></i>
                                                             </button>
                                                         </div>
                                                     </div>
-                                                    <div class="row">
-                                                        <div class="col-6">
-                                                            <small class="text-muted d-block">Port:</small>
-                                                            <div class="d-flex align-items-center">
-                                                                <code class="flex-grow-1">{{db.port}}</code>
-                                                                <button class="btn btn-sm btn-outline-secondary ms-1" ng-click="copyToClipboard(db.port)">
-                                                                    <i class="fas fa-copy"></i>
-                                                                </button>
-                                                            </div>
-                                                        </div>
-                                                        <div class="col-6">
-                                                            <small class="text-muted d-block">Database:</small>
-                                                            <div class="d-flex align-items-center">
-                                                                <code class="flex-grow-1 text-truncate">{{db.database}}</code>
-                                                                <button class="btn btn-sm btn-outline-secondary ms-1" ng-click="copyToClipboard(db.database)">
-                                                                    <i class="fas fa-copy"></i>
-                                                                </button>
-                                                            </div>
+                                                    <div class="mb-3">
+                                                        <label class="form-label fw-bold">Port:</label>
+                                                        <div class="d-flex align-items-center">
+                                                            <code class="flex-grow-1 me-2">{{db.port}}</code>
+                                                            <button class="btn btn-sm btn-outline-secondary" ng-click="copyToClipboard(db.port)">
+                                                                <i class="fas fa-copy"></i>
+                                                            </button>
                                                         </div>
                                                     </div>
-                                                    <div class="row mt-2">
-                                                        <div class="col-6">
-                                                            <small class="text-muted d-block">Username:</small>
-                                                            <div class="d-flex align-items-center">
-                                                                <code class="flex-grow-1 text-truncate">{{db.username}}</code>
-                                                                <button class="btn btn-sm btn-outline-secondary ms-1" ng-click="copyToClipboard(db.username)">
-                                                                    <i class="fas fa-copy"></i>
-                                                                </button>
-                                                            </div>
+                                                    <div class="mb-3">
+                                                        <label class="form-label fw-bold">Database:</label>
+                                                        <div class="d-flex align-items-center">
+                                                            <code class="flex-grow-1 me-2">{{db.database}}</code>
+                                                            <button class="btn btn-sm btn-outline-secondary" ng-click="copyToClipboard(db.database)">
+                                                                <i class="fas fa-copy"></i>
+                                                            </button>
                                                         </div>
-                                                        <div class="col-6">
-                                                            <small class="text-muted d-block">Password:</small>
-                                                            <div class="d-flex align-items-center">
-                                                                <code class="flex-grow-1 text-truncate">{{db.password}}</code>
-                                                                <button class="btn btn-sm btn-outline-secondary ms-1" ng-click="copyToClipboard(db.password)">
-                                                                    <i class="fas fa-copy"></i>
-                                                                </button>
-                                                            </div>
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label class="form-label fw-bold">Username:</label>
+                                                        <div class="d-flex align-items-center">
+                                                            <code class="flex-grow-1 me-2">{{db.username}}</code>
+                                                            <button class="btn btn-sm btn-outline-secondary" ng-click="copyToClipboard(db.username)">
+                                                                <i class="fas fa-copy"></i>
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                    <div class="mb-0">
+                                                        <label class="form-label fw-bold">Password:</label>
+                                                        <div class="d-flex align-items-center">
+                                                            <code class="flex-grow-1 me-2">{{db.password}}</code>
+                                                            <button class="btn btn-sm btn-outline-secondary" ng-click="copyToClipboard(db.password)">
+                                                                <i class="fas fa-copy"></i>
+                                                            </button>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -333,8 +329,8 @@
                                                             {{service.status | uppercase}}
                                                         </span>
                                                     </h6>
-                                                    <div class="mb-2">
-                                                        <small class="text-muted d-block">Server URL:</small>
+                                                    <div class="mb-3">
+                                                        <label class="form-label fw-bold">Server URL:</label>
                                                         <div class="d-flex align-items-center">
                                                             <a href="{{service.server_url}}" target="_blank" class="text-decoration-none me-2 flex-grow-1 text-truncate">
                                                                 <i class="fas fa-external-link-alt me-1"></i>
@@ -345,25 +341,23 @@
                                                             </button>
                                                         </div>
                                                     </div>
-                                                    <div class="row">
-                                                        <div class="col-6">
-                                                            <small class="text-muted d-block">Port:</small>
-                                                            <div class="d-flex align-items-center">
-                                                                <code class="flex-grow-1">{{service.port}}</code>
-                                                                <button class="btn btn-sm btn-outline-secondary ms-1" ng-click="copyToClipboard(service.port)">
-                                                                    <i class="fas fa-copy"></i>
-                                                                </button>
-                                                            </div>
-                                                        </div>
-                                                        <div class="col-6">
-                                                            <small class="text-muted d-block">Git Type:</small>
-                                                            <div class="d-flex align-items-center">
-                                                                <code class="flex-grow-1">{{service.git_type}}</code>
-                                                            </div>
+                                                    <div class="mb-3">
+                                                        <label class="form-label fw-bold">Port:</label>
+                                                        <div class="d-flex align-items-center">
+                                                            <code class="flex-grow-1 me-2">{{service.port}}</code>
+                                                            <button class="btn btn-sm btn-outline-secondary" ng-click="copyToClipboard(service.port)">
+                                                                <i class="fas fa-copy"></i>
+                                                            </button>
                                                         </div>
                                                     </div>
-                                                    <div class="mt-2">
-                                                        <small class="text-muted d-block">Git Build:</small>
+                                                    <div class="mb-3">
+                                                        <label class="form-label fw-bold">Git Type:</label>
+                                                        <div class="d-flex align-items-center">
+                                                            <code class="flex-grow-1">{{service.git_type}}</code>
+                                                        </div>
+                                                    </div>
+                                                    <div class="mb-0">
+                                                        <label class="form-label fw-bold">Git Build:</label>
                                                         <div class="d-flex align-items-center">
                                                             <a href="{{service.git_build_url}}" target="_blank" class="text-decoration-none me-2 flex-grow-1 text-truncate">
                                                                 <i class="fas fa-{{service.git_type === 'branch' ? 'code-branch' : 'tag'}} me-1"></i>
