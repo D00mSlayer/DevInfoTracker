@@ -1,15 +1,13 @@
 version: '3.8'
 
 services:
-  product-manager:
+  applens:
     build: .
     ports:
       - "5000:5000"
     environment:
       - SESSION_SECRET=${SESSION_SECRET:-dev-secret-key}
       - FLASK_ENV=production
-    volumes:
-      - ./data.yaml:/app/data.yaml:ro
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:5000/"]

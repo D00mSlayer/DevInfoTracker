@@ -12,19 +12,28 @@ ENV SESSION_SECRET=prod-secret-key-change-me
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
     gcc \
+    g++ \
+    unixodbc-dev \
+    curl \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy requirements
 COPY pyproject.toml uv.lock ./
 
 # Install Python dependencies
-RUN pip install --no-cache-dir -r <(python -c "
-import tomllib
-with open('pyproject.toml', 'rb') as f:
-    data = tomllib.load(f)
-for dep in data['project']['dependencies']:
-    print(dep)
-")
+RUN pip install --no-cache-dir \
+    email-validator \
+    flask \
+    flask-cors \
+    flask-sqlalchemy \
+    gunicorn \
+    jira \
+    psycopg2-binary \
+    pyodbc \
+    python-gitlab \
+    pyyaml \
+    requests \
+    trafilatura
 
 # Copy application code
 COPY . .

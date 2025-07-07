@@ -1,32 +1,101 @@
-# Product Environment Manager
+# AppLens
 
-A Flask-based web application for managing and viewing product environments, databases, and microservices in a hierarchical structure. Built with AngularJS frontend and Bootstrap styling.
+A comprehensive Flask-based internal developer tool for managing microservice environments, configuration tracking, and analysis.
 
 ## Features
 
-- **Hierarchical Product Management**: Navigate through Products → Base Products → Versions → Environments
-- **Environment Details**: View site URLs, git builds (branches/tags), databases, and microservices
-- **Search Functionality**: Search across all hierarchy levels
-- **Configuration Search**: Built-in support for XML configuration search (ready for MSSQL integration)
-- **Clean Light Theme**: Professional, modern interface with Bootstrap styling
-- **Responsive Design**: Works on desktop and mobile devices
+- **Environment Management**: Hierarchical view of Products → Versions → Environments
+- **Database Configuration**: MSSQL connectivity with XML configuration search
+- **Microservice Monitoring**: Real-time health checks and status monitoring
+- **Splunk Integration**: Quick access to logging and monitoring dashboards
+- **Jenkins Integration**: Bookmark and organize 100+ Jenkins job URLs
+- **Jira Analysis**: Parse ticket hierarchies and extract git links
+- **SQL Query Editor**: Execute raw SQL queries with results export
 
-## Architecture
+## Tech Stack
 
-- **Backend**: Flask with REST API endpoints
-- **Frontend**: AngularJS with Bootstrap 5
-- **Data Storage**: YAML file-based configuration
-- **Database Support**: Ready for MSSQL integration for configuration search
-- **Deployment**: Docker containerized application
+- **Backend**: Flask with REST API architecture
+- **Frontend**: AngularJS Single Page Application
+- **Database**: MSSQL with pyodbc driver
+- **Styling**: Bootstrap 5 with custom theming
+- **Configuration**: YAML-based data storage
 
-## Quick Start
+## Setup Instructions
 
-### Using Docker (Recommended)
+### 1. Clone and Configure
 
-1. **Clone and build**:
-   ```bash
-   docker-compose up --build
-   ```
+```bash
+git clone https://github.com/yourusername/applens.git
+cd applens
+
+# Copy and customize your data configuration
+cp data.yaml.template data.yaml
+# Edit data.yaml with your actual environment data
+```
+
+### 2. Local Development
+
+```bash
+# Install dependencies (from pyproject.toml)
+pip install email-validator flask flask-cors flask-sqlalchemy gunicorn jira psycopg2-binary pyodbc python-gitlab pyyaml requests trafilatura
+
+# Set environment variables
+export SESSION_SECRET="your-secret-key-here"
+export DATABASE_URL="your-database-url"  # Optional: for PostgreSQL features
+
+# Run the application
+python main.py
+```
+
+### 3. Docker Deployment
+
+```bash
+# Build the Docker image
+docker build -t applens .
+
+# Run with Docker Compose
+docker-compose up -d
+
+# Or run directly
+docker run -p 5000:5000 \
+  -e SESSION_SECRET="your-secret-key-here" \
+  applens
+```
+
+### 4. Configuration
+
+Edit `data.yaml` with your environment information:
+
+- **Products**: Your applications/services
+- **Versions**: Different versions of your applications
+- **Environments**: Dev, staging, production environments
+- **Databases**: Connection strings and credentials
+- **Microservices**: Service URLs and health check endpoints
+- **Splunk**: Logging configuration (base URL, index, source type)
+
+### 5. Security Considerations
+
+- **data.yaml**: Contains sensitive information (passwords, URLs) - never commit to version control
+- **SESSION_SECRET**: Use a strong secret key in production
+- **Database Credentials**: Store securely, consider using environment variables
+- **API Keys**: Use environment variables for Jira/GitLab API keys if using those features
+
+### 6. Optional Features
+
+#### Jira Integration
+Set environment variables:
+```bash
+export JIRA_URL="https://yourcompany.atlassian.net"
+export JIRA_EMAIL="your-email@company.com"
+export JIRA_API_TOKEN="your-api-token"
+```
+
+#### GitLab Integration
+Set environment variables:
+```bash
+export GITLAB_URL="https://gitlab.yourcompany.com"
+export GITLAB_TOKEN="your-access-token"
+```
 
 2. **Access the application**:
    - Open http://localhost:5000 in your browser

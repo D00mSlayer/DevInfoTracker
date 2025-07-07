@@ -1,0 +1,120 @@
+products:
+  - name: "YourProduct"
+    description: "Your Product Description"
+    type: "base"
+    versions:
+      - name: "v1"
+        description: "Version 1.0 description"
+        environments:
+          - name: "dev"
+            site_url: "https://dev.yourproduct.com"
+            git_build_url: "https://github.com/yourcompany/yourproduct/tree/develop"
+            git_type: "branch"
+            splunk:
+              base_url: "https://splunk.yourcompany.com"
+              index: "yourproduct_dev"
+              source_type: "application_logs"
+            databases:
+              - name: "Primary Database"
+                type: "primary"
+                host: "YOUR_DB_HOST\\SQLSERVER"
+                port: 1433
+                database: "yourproduct_dev"
+                username: "dev_user"
+                password: "YOUR_DEV_PASSWORD"
+              - name: "Secondary Database"
+                type: "secondary"
+                host: "YOUR_DB_HOST\\SQLSERVER"
+                port: 1433
+                database: "yourproduct_dev_secondary"
+                username: "dev_user"
+                password: "YOUR_DEV_PASSWORD"
+            microservices:
+              - name: "user-service"
+                server_url: "https://user-service-dev.yourcompany.com"
+                port: 8080
+                git_build_url: "https://github.com/yourcompany/user-service/tree/develop"
+                git_type: "branch"
+              - name: "order-service"
+                server_url: "https://order-service-dev.yourcompany.com"
+                port: 8081
+                git_build_url: "https://github.com/yourcompany/order-service/tree/develop"
+                git_type: "branch"
+          - name: "prod"
+            site_url: "https://yourproduct.com"
+            git_build_url: "https://github.com/yourcompany/yourproduct/releases/tag/v1.0.0"
+            git_type: "tag"
+            splunk:
+              base_url: "https://splunk.yourcompany.com"
+              index: "yourproduct_prod"
+              source_type: "application_logs"
+            databases:
+              - name: "Primary Database"
+                type: "primary"
+                host: "YOUR_PROD_DB_HOST\\SQLSERVER"
+                port: 1433
+                database: "yourproduct_prod"
+                username: "prod_user"
+                password: "YOUR_PROD_PASSWORD"
+            microservices:
+              - name: "user-service"
+                server_url: "https://user-service.yourcompany.com"
+                port: 8080
+                git_build_url: "https://github.com/yourcompany/user-service/releases/tag/v1.0.0"
+                git_type: "tag"
+              - name: "order-service"
+                server_url: "https://order-service.yourcompany.com"
+                port: 8081
+                git_build_url: "https://github.com/yourcompany/order-service/releases/tag/v1.0.0"
+                git_type: "tag"
+  - name: "Client A"
+    description: "Client-specific customized version"
+    type: "client"
+    versions:
+      - name: "v1"
+        description: "Client A Version 1.0"
+        environments:
+          - name: "uat"
+            site_url: "https://clienta-uat.yourproduct.com"
+            git_build_url: "https://github.com/yourcompany/yourproduct-clienta/tree/uat"
+            git_type: "branch"
+            splunk:
+              base_url: "https://splunk.yourcompany.com"
+              index: "clienta_uat"
+              source_type: "application_logs"
+            databases:
+              - name: "Primary Database"
+                type: "primary"
+                host: "YOUR_CLIENT_DB_HOST\\SQLSERVER"
+                port: 1433
+                database: "yourproduct_clienta_uat"
+                username: "clienta_uat_user"
+                password: "YOUR_CLIENT_UAT_PASSWORD"
+            microservices:
+              - name: "user-service"
+                server_url: "https://clienta-user-service-uat.yourcompany.com"
+                port: 8080
+                git_build_url: "https://github.com/yourcompany/user-service/tree/clienta-uat"
+                git_type: "branch"
+          - name: "prod"
+            site_url: "https://clienta.yourproduct.com"
+            git_build_url: "https://github.com/yourcompany/yourproduct-clienta/releases/tag/v1.0.0"
+            git_type: "tag"
+            splunk:
+              base_url: "https://splunk.yourcompany.com"
+              index: "clienta_prod"
+              source_type: "application_logs"
+            databases:
+              - name: "Primary Database"
+                type: "primary"
+                host: "YOUR_CLIENT_PROD_DB_HOST\\SQLSERVER"
+                port: 1433
+                database: "yourproduct_clienta_prod"
+                username: "clienta_prod_user"
+                password: "YOUR_CLIENT_PROD_PASSWORD"
+            microservices:
+              - name: "user-service"
+                server_url: "https://clienta-user-service.yourcompany.com"
+                port: 8080
+                git_build_url: "https://github.com/yourcompany/user-service/releases/tag/clienta-v1.0.0"
+                git_type: "tag"
