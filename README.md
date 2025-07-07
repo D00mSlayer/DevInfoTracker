@@ -49,12 +49,13 @@ python main.py
 
 ### 3. Docker Deployment
 
+#### Production Deployment
 ```bash
 # Copy and customize your data configuration
 cp data.yaml.template data.yaml
 # Edit data.yaml with your actual environment data
 
-# Build and run with Docker Compose (recommended)
+# Build and run with Docker Compose (production)
 docker-compose up -d
 
 # Or build and run directly with volume mount
@@ -65,10 +66,33 @@ docker run -p 5000:5000 \
   applens
 ```
 
-**Note**: The Docker setup mounts your local `data.yaml` file as a read-only volume. This means:
-- Changes to `data.yaml` on your host machine will be reflected in the Docker container
-- You can update environment configurations without rebuilding the Docker image
-- The application will automatically reload when you modify the data file
+#### Development with Live Code Updates & Debugging
+```bash
+# Copy and customize your data configuration
+cp data.yaml.template data.yaml
+# Edit data.yaml with your actual environment data
+
+# Run in development mode with live code reload
+docker-compose -f docker-compose.dev.yml up -d
+
+# View logs to see debug output
+docker-compose -f docker-compose.dev.yml logs -f applens-dev
+
+# Attach to container for interactive debugging
+docker-compose -f docker-compose.dev.yml exec applens-dev bash
+```
+
+**Development Features**:
+- **Live Code Updates**: Changes to Python files on your host machine are immediately reflected in the container
+- **Python Debugging**: You can use `pdb.set_trace()` or `breakpoint()` in your code
+- **Interactive Console**: Use `stdin_open: true` and `tty: true` for interactive debugging
+- **Auto-reload**: Flask automatically reloads when you modify files
+- **Debug Mode**: Full Flask debugging enabled with detailed error pages
+
+**Volume Mounting**:
+- `data.yaml` is mounted read-only for configuration updates
+- Entire project directory is mounted read-write for live code development
+- Changes to any Python file trigger automatic Flask reloads
 
 ### 4. Configuration
 

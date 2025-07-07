@@ -1,24 +1,27 @@
 version: '3.8'
 
 services:
-  applens:
+  applens-dev:
     build: .
     ports:
       - "5000:5000"
     environment:
-      - SESSION_SECRET=${SESSION_SECRET:-change-me-in-production}
-      - FLASK_ENV=production
-      - FLASK_DEBUG=0
+      - SESSION_SECRET=${SESSION_SECRET:-dev-secret-key}
+      - FLASK_ENV=development
+      - FLASK_DEBUG=1
+      - PYTHONUNBUFFERED=1
     volumes:
-      - ./data.yaml:/app/data.yaml:ro
+      - .:/app:rw
+    stdin_open: true
+    tty: true
     restart: unless-stopped
-    command: ["gunicorn", "--bind", "0.0.0.0:5000", "--workers", "2", "--timeout", "120", "main:app"]
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:5000/"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 40s
+    command: ["python", "main.py"]
 
   # Optional: Add MSSQL database for configuration search
   # mssql:
