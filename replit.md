@@ -119,6 +119,9 @@ Production deployment would require:
 - Added backend API endpoint for health checking with 5-second timeout
 - Added frontend health check functionality with "checking" status and spinner animation
 - Health checks perform HTTP GET requests to microservice URLs and determine online/offline status
+- Added Splunk configuration section to environment modals between environment info and database config
+- Added Splunk base URL, index, and source_type fields to all environments in data.yaml
+- Implemented clickable Splunk base URL links and copy-to-clipboard functionality for all Splunk fields
 
 ## User Preferences
 

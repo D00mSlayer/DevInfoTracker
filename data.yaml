@@ -12,6 +12,10 @@ products:
                 site_url: "https://dev.ecommerce.company.com"
                 git_build_url: "https://github.com/company/ecommerce/tree/develop"
                 git_type: "branch"
+                splunk:
+                  base_url: "https://splunk.company.com"
+                  index: "ecommerce_dev"
+                  source_type: "application_logs"
                 databases:
                   - name: "Primary Database"
                     type: "primary"
@@ -47,6 +51,10 @@ products:
                 site_url: "https://qa.ecommerce.company.com"
                 git_build_url: "https://github.com/company/ecommerce/tree/qa"
                 git_type: "branch"
+                splunk:
+                  base_url: "https://splunk.company.com"
+                  index: "ecommerce_qa"
+                  source_type: "application_logs"
                 databases:
                   - name: "Primary Database"
                     type: "primary"
@@ -70,6 +78,10 @@ products:
                 site_url: "https://ecommerce.company.com"
                 git_build_url: "https://github.com/company/ecommerce/releases/tag/v1.2.3"
                 git_type: "tag"
+                splunk:
+                  base_url: "https://splunk.company.com"
+                  index: "ecommerce_prod"
+                  source_type: "application_logs"
                 databases:
                   - name: "Primary Database"
                     type: "primary"
@@ -103,6 +115,10 @@ products:
                 site_url: "https://v2-dev.ecommerce.company.com"
                 git_build_url: "https://github.com/company/ecommerce/tree/v2-develop"
                 git_type: "branch"
+                splunk:
+                  base_url: "https://splunk.company.com"
+                  index: "ecommerce_v2_dev"
+                  source_type: "application_logs"
                 databases:
                   - name: "Primary Database"
                     type: "primary"
@@ -137,6 +153,10 @@ products:
                 site_url: "https://clienta-uat.ecommerce.company.com"
                 git_build_url: "https://github.com/company/ecommerce-clienta/tree/uat"
                 git_type: "branch"
+                splunk:
+                  base_url: "https://splunk.company.com"
+                  index: "clienta_uat"
+                  source_type: "application_logs"
                 databases:
                   - name: "Primary Database"
                     type: "primary"
@@ -155,6 +175,10 @@ products:
                 site_url: "https://clienta.ecommerce.company.com"
                 git_build_url: "https://github.com/company/ecommerce-clienta/releases/tag/v1.0.5"
                 git_type: "tag"
+                splunk:
+                  base_url: "https://splunk.company.com"
+                  index: "clienta_prod"
+                  source_type: "application_logs"
                 databases:
                   - name: "Primary Database"
                     type: "primary"
